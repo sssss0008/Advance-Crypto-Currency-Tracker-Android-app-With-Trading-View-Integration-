@@ -1,0 +1,63 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Outer Shield/Hexagon Badge -->
+    <path
+        android:pathData="M54,26 L76,38 L76,70 L54,82 L32,70 L32,38 Z"
+        android:strokeWidth="2.5"
+        android:strokeColor="#F7931A">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:angle="90"
+                android:startColor="#1A2234"
+                android:endColor="#0F172A"
+                android:type="linear" />
+        </aapt:attr>
+    </path>
+
+    <!-- Candlestick 1 (Bearish red/accent) -->
+    <path
+        android:fillColor="#FF5252"
+        android:pathData="M40,54 L44,54 L44,66 L40,66 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF5252"
+        android:strokeWidth="1.2"
+        android:pathData="M42,48 L42,54 M42,66 L42,70" />
+
+    <!-- Candlestick 2 (Bullish green) -->
+    <path
+        android:fillColor="#00E676"
+        android:pathData="M52,44 L56,44 L56,60 L52,60 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00E676"
+        android:strokeWidth="1.2"
+        android:pathData="M54,40 L54,44 M54,60 L54,65" />
+
+    <!-- Candlestick 3 (Bullish high green) -->
+    <path
+        android:fillColor="#00E676"
+        android:pathData="M64,36 L68,36 L68,52 L64,52 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00E676"
+        android:strokeWidth="1.2"
+        android:pathData="M66,32 L66,36 M66,52 L66,58" />
+
+    <!-- Upward Trend Line connecting candles -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:pathData="M38,64 L50,56 L62,40 L70,34" />
+
+    <!-- Trend Tip Arrow / Pulse Node -->
+    <path
+        android:fillColor="#F7931A"
+        android:pathData="M70,34 m-3,0 a3,3 0 1,1 6,0 a3,3 0 1,1 -6,0" />
+</vector>

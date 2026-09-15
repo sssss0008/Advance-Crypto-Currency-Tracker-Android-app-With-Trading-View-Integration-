@@ -1,0 +1,476 @@
+package com.example
+
+import android.content.res.Configuration
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.CandlestickChart
+import androidx.compose.material.icons.filled.CurrencyExchange
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.ui.AppTab
+import com.example.ui.CryptoViewModel
+import com.example.ui.components.AppDrawerContent
+import com.example.ui.components.CryptoDetailModal
+import com.example.ui.components.TickerTapeBar
+import com.example.ui.screens.CryptoAiHubScreen
+import com.example.ui.screens.CryptoCalculatorsScreen
+import com.example.ui.screens.CryptoChartScreen
+import com.example.ui.screens.CryptoDictionaryScreen
+import com.example.ui.screens.CryptoEducationScreen
+import com.example.ui.screens.CryptoHeatmapScreen
+import com.example.ui.screens.CryptoScreenerScreen
+import com.example.ui.screens.MarketOverviewScreen
+import com.example.ui.screens.WatchlistScreen
+import com.example.ui.theme.CryptoAccentCyan
+import com.example.ui.theme.CryptoAccentGold
+import com.example.ui.theme.CryptoGreen
+import com.example.ui.theme.CryptoPrimary
+import com.example.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.launch
+
+class MainActivity : ComponentActivity() {
+
+    private val viewModel: CryptoViewModel by viewModels {
+        CryptoViewModel.Factory(application)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        CryptoApplication.ensureWebViewCacheDirectories(this)
+        enableEdgeToEdge()
+        setContent {
+            val uiState by viewModel.uiState.collectAsState()
+
+            MyApplicationTheme(darkTheme = uiState.isDarkTheme) {
+                CryptoApp(
+                    viewModel = viewModel
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CryptoApp(
+    viewModel: CryptoViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isChartTab = uiState.currentTab == AppTab.CHART
+    val hideBars = isChartTab && (uiState.isChartFullscreen || isLandscape)
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = !uiState.isChartFullscreen,
+        drawerContent = {
+            AppDrawerContent(
+                currentTab = uiState.currentTab,
+                coins = uiState.coins,
+                isDarkTheme = uiState.isDarkTheme,
+                onTabSelected = { tab ->
+                    viewModel.setTab(tab)
+                },
+                onCoinSelected = { coin ->
+                    viewModel.selectCoin(coin)
+                },
+                onToggleTheme = {
+                    viewModel.toggleTheme()
+                },
+                onCloseDrawer = {
+                    scope.launch { drawerState.close() }
+                }
+            )
+        }
+    ) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("crypto_app_scaffold"),
+            topBar = {
+                if (!hideBars) {
+                    TopAppBar(
+                        navigationIcon = {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                    }
+                                },
+                                modifier = Modifier.testTag("open_drawer_btn")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Open Navigation Drawer",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        },
+                        title = {
+                            val headerTitle = when (uiState.currentTab) {
+                                AppTab.MARKETS -> "Crypto Markets"
+                                AppTab.WATCHLIST -> "My Watchlist"
+                                AppTab.DICTIONARY -> "Crypto Dictionary"
+                                AppTab.CALCULATORS -> "Crypto Calculators"
+                                AppTab.EDUCATION -> "Education Hub"
+                                AppTab.AI_HUB -> "AI Hub"
+                                AppTab.HEATMAP -> "Visual Heatmap"
+                                AppTab.SCREENER -> "Crypto Screener"
+                                AppTab.CHART -> "Live Charts"
+                            }
+
+                            val headerSubtitle = when (uiState.currentTab) {
+                                AppTab.MARKETS -> "Movers & Volume"
+                                AppTab.WATCHLIST -> "${uiState.coins.count { it.isFavorite }} Starred Assets"
+                                AppTab.DICTIONARY -> "1,000+ Words & Examples"
+                                AppTab.CALCULATORS -> "7 Precision Tools & Keypad"
+                                AppTab.EDUCATION -> "Academy & Practice Quiz"
+                                AppTab.AI_HUB -> "Gemini 3.5 AI Assistant"
+                                AppTab.HEATMAP -> "Top Market Cap Treemap"
+                                AppTab.SCREENER -> "Custom Filters & Metrics"
+                                AppTab.CHART -> "Interactive TradingView"
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            when (uiState.currentTab) {
+                                                AppTab.AI_HUB -> CryptoPrimary
+                                                AppTab.WATCHLIST -> CryptoAccentGold
+                                                AppTab.DICTIONARY -> CryptoAccentCyan
+                                                AppTab.EDUCATION -> CryptoGreen
+                                                else -> MaterialTheme.colorScheme.primary
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = when (uiState.currentTab) {
+                                            AppTab.AI_HUB -> Icons.Default.AutoAwesome
+                                            AppTab.WATCHLIST -> Icons.Default.Star
+                                            AppTab.DICTIONARY -> Icons.Default.MenuBook
+                                            AppTab.CALCULATORS -> Icons.Default.Calculate
+                                            AppTab.EDUCATION -> Icons.Default.School
+                                            AppTab.HEATMAP -> Icons.Default.GridView
+                                            AppTab.SCREENER -> Icons.Default.Tune
+                                            AppTab.CHART -> Icons.Default.CandlestickChart
+                                            else -> Icons.Default.CurrencyExchange
+                                        },
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Column {
+                                    Text(
+                                        text = headerTitle,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = headerSubtitle,
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = { viewModel.setTab(AppTab.AI_HUB) },
+                                modifier = Modifier.testTag("header_ai_hub_btn")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "AI Hub",
+                                    tint = CryptoPrimary
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { viewModel.toggleTheme() },
+                                modifier = Modifier.testTag("theme_toggle_btn")
+                            ) {
+                                Icon(
+                                    imageVector = if (uiState.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                    contentDescription = "Toggle Theme",
+                                    tint = if (uiState.isDarkTheme) CryptoAccentGold else MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
+            },
+            bottomBar = {
+                if (!hideBars) {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 8.dp,
+                        modifier = Modifier.testTag("bottom_nav_bar")
+                    ) {
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.MARKETS,
+                            onClick = { viewModel.setTab(AppTab.MARKETS) },
+                            icon = { Icon(Icons.Default.CurrencyExchange, contentDescription = "Markets") },
+                            label = { Text("Markets", fontSize = 10.sp) },
+                            modifier = Modifier.testTag("nav_tab_markets"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.WATCHLIST,
+                            onClick = { viewModel.setTab(AppTab.WATCHLIST) },
+                            icon = { Icon(Icons.Default.Star, contentDescription = "Watchlist") },
+                            label = { Text("Watchlist", fontSize = 10.sp) },
+                            modifier = Modifier.testTag("nav_tab_watchlist"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoAccentGold,
+                                selectedTextColor = CryptoAccentGold,
+                                indicatorColor = CryptoAccentGold.copy(alpha = 0.2f)
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.CHART,
+                            onClick = { viewModel.setTab(AppTab.CHART) },
+                            icon = { Icon(Icons.Default.CandlestickChart, contentDescription = "Charts") },
+                            label = { Text("Charts", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            modifier = Modifier.testTag("nav_tab_chart"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.AI_HUB,
+                            onClick = { viewModel.setTab(AppTab.AI_HUB) },
+                            icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "AI") },
+                            label = { Text("AI", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            modifier = Modifier.testTag("nav_tab_ai_hub"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoPrimary,
+                                selectedTextColor = CryptoPrimary,
+                                indicatorColor = CryptoPrimary.copy(alpha = 0.2f)
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = false,
+                            onClick = {
+                                scope.launch {
+                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                }
+                            },
+                            icon = { Icon(Icons.Default.Menu, contentDescription = "All Hubs") },
+                            label = { Text("Hubs", fontSize = 10.sp) },
+                            modifier = Modifier.testTag("nav_tab_drawer_menu"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                // Persistent Real-time Ticker Tape Bar (hidden in Chart tab for edge-to-edge chart space)
+                if (!isChartTab) {
+                    TickerTapeBar(
+                        coins = uiState.coins,
+                        isTvMode = uiState.isTvTickerMode,
+                        isDarkTheme = uiState.isDarkTheme,
+                        onToggleTvMode = { viewModel.toggleTvTickerMode() },
+                        onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
+                        onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
+                    )
+                }
+
+                // Animated Screen Switching
+                AnimatedContent(
+                    targetState = uiState.currentTab,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "screen_transition",
+                    modifier = Modifier.weight(1f)
+                ) { tab ->
+                    when (tab) {
+                        AppTab.MARKETS -> {
+                            MarketOverviewScreen(
+                                coins = uiState.coins,
+                                metrics = uiState.metrics,
+                                isTvMode = uiState.isTvOverviewMode,
+                                isDarkTheme = uiState.isDarkTheme,
+                                onToggleTvMode = { viewModel.toggleTvOverviewMode() },
+                                onCoinClick = { coin -> viewModel.selectCoin(coin) },
+                                onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
+                                onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
+                            )
+                        }
+                        AppTab.WATCHLIST -> {
+                            WatchlistScreen(
+                                coins = uiState.coins,
+                                onCoinClick = { coin -> viewModel.selectCoin(coin) },
+                                onChartClick = { coin -> viewModel.openChartForCoin(coin) },
+                                onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
+                                onExploreCoins = { viewModel.setTab(AppTab.MARKETS) }
+                            )
+                        }
+                        AppTab.DICTIONARY -> {
+                            CryptoDictionaryScreen(
+                                onAskAiAboutTerm = { term ->
+                                    viewModel.openAiWithPrompt("Provide an in-depth quantitative and practical crypto breakdown of '$term' including real-world trade setups and tokenomic implications.")
+                                }
+                            )
+                        }
+                        AppTab.CALCULATORS -> {
+                            CryptoCalculatorsScreen(coins = uiState.coins)
+                        }
+                        AppTab.EDUCATION -> {
+                            CryptoEducationScreen()
+                        }
+                        AppTab.AI_HUB -> {
+                            CryptoAiHubScreen(
+                                coins = uiState.coins,
+                                initialPrompt = uiState.aiPrompt
+                            )
+                        }
+                        AppTab.HEATMAP -> {
+                            CryptoHeatmapScreen(
+                                coins = uiState.coins,
+                                isTvMode = uiState.isTvHeatmapMode,
+                                isDarkTheme = uiState.isDarkTheme,
+                                onToggleTvMode = { viewModel.toggleTvHeatmapMode() },
+                                onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
+                                onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
+                            )
+                        }
+                        AppTab.SCREENER -> {
+                            CryptoScreenerScreen(
+                                coins = uiState.coins,
+                                isTvMode = uiState.isTvScreenerMode,
+                                isDarkTheme = uiState.isDarkTheme,
+                                searchQuery = uiState.searchQuery,
+                                selectedCategory = uiState.selectedCategory,
+                                selectedSortOption = uiState.selectedSortOption,
+                                selectedColumn = uiState.selectedScreenerColumn,
+                                onSearchQueryChange = { viewModel.setSearchQuery(it) },
+                                onCategoryChange = { viewModel.setSelectedCategory(it) },
+                                onSortOptionChange = { viewModel.setSelectedSortOption(it) },
+                                onColumnChange = { viewModel.setSelectedScreenerColumn(it) },
+                                onToggleTvMode = { viewModel.toggleTvScreenerMode() },
+                                onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
+                                onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
+                                onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
+                            )
+                        }
+                        AppTab.CHART -> {
+                            CryptoChartScreen(
+                                symbol = uiState.selectedChartSymbol,
+                                coins = uiState.coins,
+                                isDarkTheme = uiState.isDarkTheme,
+                                isFullscreen = uiState.isChartFullscreen,
+                                onToggleFullscreen = { viewModel.toggleChartFullscreen() },
+                                onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Detail & Interactive Chart Modal
+    if (uiState.selectedCoin != null) {
+        CryptoDetailModal(
+            coin = uiState.selectedCoin,
+            isDarkTheme = uiState.isDarkTheme,
+            onDismiss = { viewModel.selectCoin(null) },
+            onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
+            onOpenFullChart = { symbol -> viewModel.openChart(symbol) }
+        )
+    }
+}

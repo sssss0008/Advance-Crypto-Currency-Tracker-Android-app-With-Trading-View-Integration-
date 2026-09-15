@@ -1,0 +1,6 @@
+{
+  "name": "Crypto Market",
+  "description": "Comprehensive crypto intelligence terminal featuring navigation drawer, watchlist, 1,000+ word crypto dictionary with examples, financial calculators, interactive education hub with quizzes, and Gemini AI market insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
