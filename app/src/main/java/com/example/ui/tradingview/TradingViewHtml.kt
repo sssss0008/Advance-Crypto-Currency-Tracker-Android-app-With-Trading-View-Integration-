@@ -53,6 +53,7 @@ object TradingViewHtml {
                             return url.indexOf('/symbols/') !== -1 ||
                                    url.indexOf('symbol=') !== -1 ||
                                    url.indexOf('tvwidgetsymbol=') !== -1 ||
+                                   url.indexOf('wealthorbitcenter.com') !== -1 ||
                                    url.indexOf('/markets/cryptocurrencies/') !== -1;
                         }
 
@@ -180,7 +181,7 @@ object TradingViewHtml {
                 "isTransparent": false,
                 "locale": "en",
                 "colorTheme": "$theme",
-                "largeChartUrl": "https://wealthorbitcenter.com/free-live-trading-real-time-chart-stocks-forex-crypto/",
+                "largeChartUrl": "https://wealthorbitcenter.com/free-live-trading-real-time-chart-stocks-forex-crypto/?tvwidgetsymbol={proName}&symbol={proName}",
                 "width": "100%",
                 "height": "100%"
               }

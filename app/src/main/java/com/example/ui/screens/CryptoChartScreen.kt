@@ -89,14 +89,36 @@ fun CryptoChartScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    // Find the corresponding coin data if available
-    val coin = remember(symbol, coins) {
-        coins.firstOrNull { it.tvSymbol.equals(symbol, ignoreCase = true) }
-            ?: coins.firstOrNull { it.symbol.equals(symbol, ignoreCase = true) }
-            ?: coins.firstOrNull { symbol.contains(it.symbol, ignoreCase = true) }
-            ?: coins.firstOrNull()
+    // Clean and validate the incoming symbol first
+    val cleanedSymbol = remember(symbol) {
+        com.example.ui.tradingview.cleanSymbolFormat(symbol)
     }
-    val effectiveSymbol = coin?.tvSymbol ?: symbol
+
+    // Find the corresponding coin data if available
+    val coin = remember(symbol, cleanedSymbol, coins) {
+        coins.firstOrNull { it.tvSymbol.equals(cleanedSymbol, ignoreCase = true) }
+            ?: coins.firstOrNull { it.tvSymbol.equals(symbol, ignoreCase = true) }
+            ?: coins.firstOrNull { it.symbol.equals(cleanedSymbol, ignoreCase = true) }
+            ?: coins.firstOrNull { it.symbol.equals(symbol, ignoreCase = true) }
+            ?: coins.firstOrNull {
+                val base = it.symbol.uppercase()
+                cleanedSymbol.endsWith(":$base") ||
+                cleanedSymbol.endsWith(":$base" + "USDT") ||
+                cleanedSymbol.endsWith(":$base" + "USD") ||
+                cleanedSymbol == "${base}USDT" ||
+                cleanedSymbol == "${base}USD"
+            }
+    }
+
+    // CRITICAL: The effective chart symbol must ALWAYS reflect the selected symbol!
+    // Never force fallback to Bitcoin unless incoming symbol is completely blank.
+    val effectiveSymbol = if (cleanedSymbol.isNotBlank()) {
+        cleanedSymbol
+    } else if (symbol.isNotBlank()) {
+        symbol
+    } else {
+        coin?.tvSymbol ?: "BITSTAMP:BTCUSD"
+    }
 
     // If in fullscreen, back press exits fullscreen mode
     BackHandler(enabled = isFullscreen) {
@@ -129,6 +151,8 @@ fun CryptoChartScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Left: Clickable coin info with search badge
+                    val displaySymbol = coin?.symbol ?: symbol.substringAfter(":").replace("USDT", "").replace("USD", "").ifBlank { symbol }
+                    val displayName = coin?.name ?: displaySymbol
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -137,12 +161,12 @@ fun CryptoChartScreen(
                             .padding(horizontal = 4.dp, vertical = 2.dp)
                             .testTag("chart_coin_picker_btn")
                     ) {
-                        CryptoCoinVectorBadge(symbol = coin?.symbol ?: symbol, size = 22.dp)
+                        CryptoCoinVectorBadge(symbol = displaySymbol, size = 22.dp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = coin?.name ?: symbol,
+                                    text = displayName,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
@@ -174,6 +198,13 @@ fun CryptoChartScreen(
                                         color = if (isPositive) CryptoGreen else CryptoRed
                                     )
                                 }
+                            } else {
+                                Text(
+                                    text = effectiveSymbol,
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
                     }
@@ -403,6 +434,41 @@ fun CryptoChartScreen(
                                         )
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    if (searchQuery.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    val cleaned = com.example.ui.tradingview.cleanSymbolFormat(searchQuery)
+                                    onSelectSymbol?.invoke(cleaned)
+                                    showSearchDialog = false
+                                    searchQuery = ""
+                                },
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Load Chart for \"${searchQuery.uppercase()}\"",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
                             }
                         }
                     }

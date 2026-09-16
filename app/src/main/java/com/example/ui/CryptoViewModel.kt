@@ -42,7 +42,7 @@ data class CryptoUiState(
     val isTvOverviewMode: Boolean = true,
     val isTvHeatmapMode: Boolean = true,
     val isTvScreenerMode: Boolean = true,
-    val isTvTickerMode: Boolean = true,
+    val isTvTickerMode: Boolean = false,
     val isTvChartMode: Boolean = true,
     // Filters & Sorting
     val searchQuery: String = "",
@@ -149,12 +149,18 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
             it.tvSymbol.equals(symbol, ignoreCase = true) ||
             it.symbol.equals(cleaned, ignoreCase = true) ||
             it.symbol.equals(symbol, ignoreCase = true) ||
-            cleaned.contains(it.symbol, ignoreCase = true) ||
-            symbol.contains(it.symbol, ignoreCase = true)
+            (it.symbol.length >= 3 && (
+                cleaned.endsWith(":${it.symbol}") ||
+                cleaned.endsWith(":${it.symbol}USDT") ||
+                cleaned.endsWith(":${it.symbol}USD") ||
+                cleaned == "${it.symbol}USDT" ||
+                cleaned == "${it.symbol}USD"
+            ))
         }
+        val finalSymbol = targetCoin?.tvSymbol ?: if (cleaned.isNotBlank()) cleaned else symbol
         _uiState.update {
             it.copy(
-                selectedChartSymbol = targetCoin?.tvSymbol ?: cleaned,
+                selectedChartSymbol = finalSymbol,
                 currentTab = AppTab.CHART,
                 selectedCoin = null
             )

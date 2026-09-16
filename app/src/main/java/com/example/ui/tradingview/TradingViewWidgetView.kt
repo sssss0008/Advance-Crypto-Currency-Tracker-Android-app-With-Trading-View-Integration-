@@ -58,6 +58,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 private const val TAG = "TradingViewWidget"
 
@@ -101,9 +104,10 @@ fun TradingViewWidgetView(
                                     ViewGroup.LayoutParams.MATCH_PARENT
                                 )
                                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                                // Force software rendering layer on WebView to avoid Mesa DRI rendernode lookups
-                                // and renderer process crash (code -1) in emulator / virtualized container environments
-                                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                                // Standard rendering layer for WebView: avoid LAYER_TYPE_SOFTWARE which
+                                // forces full-size CPU bitmap allocations on every frame for 60fps canvas animations,
+                                // preventing memory exhaustion and Chromium renderer process crashes (code -1).
+                                setLayerType(View.LAYER_TYPE_NONE, null)
 
                                 settings.apply {
                                     javaScriptEnabled = true
@@ -132,7 +136,8 @@ fun TradingViewWidgetView(
                                     fun onSymbolClick(urlOrSymbol: String?) {
                                         if (urlOrSymbol.isNullOrBlank()) return
                                         val uri = try { Uri.parse(urlOrSymbol) } catch (_: Throwable) { null }
-                                        val sym = if (uri != null) parseTradingViewSymbol(uri) else cleanSymbolFormat(urlOrSymbol)
+                                        val sym = (if (uri != null) parseTradingViewSymbol(uri) else null)
+                                            ?: cleanSymbolFormat(urlOrSymbol)
                                         if (!sym.isNullOrBlank() && onSymbolSelected != null) {
                                             Handler(Looper.getMainLooper()).post {
                                                 onSymbolSelected.invoke(sym)
@@ -302,6 +307,18 @@ fun TradingViewWidgetView(
                                 hasError = true
                             }
                         }
+                    },
+                    onRelease = { webView ->
+                        if (webView is WebView) {
+                            try {
+                                webView.stopLoading()
+                                webView.onPause()
+                                (webView.parent as? ViewGroup)?.removeView(webView)
+                                webView.destroy()
+                            } catch (e: Throwable) {
+                                Log.w(TAG, "Error releasing WebView", e)
+                            }
+                        }
                     }
                 )
             }
@@ -401,8 +418,46 @@ fun TradingViewWidgetView(
         }
     }
 
-    DisposableEffect(reloadKey) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, reloadKey) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    try {
+                        webViewRef?.onPause()
+                        webViewRef?.pauseTimers()
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "Error pausing WebView", t)
+                    }
+                }
+                Lifecycle.Event.ON_RESUME -> {
+                    try {
+                        webViewRef?.onResume()
+                        webViewRef?.resumeTimers()
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "Error resuming WebView", t)
+                    }
+                }
+                Lifecycle.Event.ON_DESTROY -> {
+                    try {
+                        webViewRef?.let { wv ->
+                            wv.stopLoading()
+                            wv.onPause()
+                            wv.pauseTimers()
+                            (wv.parent as? ViewGroup)?.removeView(wv)
+                            wv.destroy()
+                        }
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "Error destroying WebView on destroy", t)
+                    }
+                    webViewRef = null
+                }
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             try {
                 webViewRef?.let { wv ->
                     wv.stopLoading()
@@ -424,6 +479,46 @@ internal fun cleanSymbolFormat(rawInput: String): String {
         raw = raw.dropLast(1)
     }
 
+    // Direct coin name mapping (from URLs like prices-ethereum, prices-solana)
+    val coinNameMap = mapOf(
+        "BITCOIN" to "BITSTAMP:BTCUSD",
+        "ETHEREUM" to "BITSTAMP:ETHUSD",
+        "SOLANA" to "BINANCE:SOLUSDT",
+        "BINANCECOIN" to "BINANCE:BNBUSDT",
+        "BNB" to "BINANCE:BNBUSDT",
+        "RIPPLE" to "BINANCE:XRPUSDT",
+        "XRP" to "BINANCE:XRPUSDT",
+        "DOGECOIN" to "BINANCE:DOGEUSDT",
+        "DOGE" to "BINANCE:DOGEUSDT",
+        "AVALANCHE" to "BINANCE:AVAXUSDT",
+        "AVAX" to "BINANCE:AVAXUSDT",
+        "CARDANO" to "BINANCE:ADAUSDT",
+        "ADA" to "BINANCE:ADAUSDT",
+        "NEAR" to "BINANCE:NEARUSDT",
+        "CHAINLINK" to "BINANCE:LINKUSDT",
+        "LINK" to "BINANCE:LINKUSDT",
+        "SUI" to "BINANCE:SUIUSDT",
+        "APTOS" to "BINANCE:APTUSDT",
+        "APT" to "BINANCE:APTUSDT",
+        "POLKADOT" to "BINANCE:DOTUSDT",
+        "DOT" to "BINANCE:DOTUSDT",
+        "POLYGON" to "BINANCE:MATICUSDT",
+        "MATIC" to "BINANCE:MATICUSDT",
+        "SHIBA" to "BINANCE:SHIBUSDT",
+        "SHIB" to "BINANCE:SHIBUSDT",
+        "PEPE" to "BINANCE:PEPEUSDT",
+        "ZCASH" to "BINANCE:ZECUSDT",
+        "ZEC" to "BINANCE:ZECUSDT",
+        "TONCOIN" to "BINANCE:TONUSDT",
+        "TON" to "BINANCE:TONUSDT",
+        "TRON" to "BINANCE:TRXUSDT",
+        "TRX" to "BINANCE:TRXUSDT",
+        "LITECOIN" to "BINANCE:LTCUSDT",
+        "LTC" to "BINANCE:LTCUSDT"
+    )
+    coinNameMap[raw]?.let { return it }
+
+    // If exchange:pair is already present (e.g., BINANCE:ETHUSDT or BITSTAMP:BTCUSD)
     if (raw.contains(":")) {
         val parts = raw.split(":")
         if (parts.size == 2 && parts[0].isNotEmpty() && parts[1].isNotEmpty()) {
@@ -434,10 +529,16 @@ internal fun cleanSymbolFormat(rawInput: String): String {
         return raw
     }
 
+    // TradingView hyphenated symbols (e.g. BINANCE-ETHUSDT or BITSTAMP-BTCUSD)
     if (raw.contains("-")) {
         val parts = raw.split("-")
         if (parts.size >= 2 && parts[0].isNotEmpty() && parts[1].isNotEmpty()) {
-            return "${parts[0]}:${parts[1]}"
+            val ex = parts[0]
+            val rest = parts.drop(1).joinToString("-")
+            val knownExchanges = setOf("BINANCE", "BITSTAMP", "COINBASE", "BYBIT", "OKX", "KRAKEN", "CRYPTOCAP", "MEXC", "KUCOIN", "GATEIO", "BITFINEX")
+            if (knownExchanges.contains(ex)) {
+                return "$ex:$rest"
+            }
         }
     }
 
@@ -463,7 +564,7 @@ internal fun cleanSymbolFormat(rawInput: String): String {
     )
 
     for ((sym, tv) in knownCoins) {
-        if (raw == sym || raw == "${sym}USD" || raw == "${sym}USDT" || (raw.length > 2 && raw.contains(sym))) {
+        if (raw == sym || raw == "${sym}USD" || raw == "${sym}USDT" || raw.endsWith(":${sym}USD") || raw.endsWith(":${sym}USDT")) {
             return tv
         }
     }
@@ -479,14 +580,24 @@ internal fun cleanSymbolFormat(rawInput: String): String {
 
 internal fun parseTradingViewSymbol(uri: android.net.Uri): String? {
     try {
-        val querySymbol = uri.getQueryParameter("symbol")?.trim()
-        if (!querySymbol.isNullOrBlank()) {
-            return cleanSymbolFormat(querySymbol)
+        // Direct exchange:pair URI schemes (e.g. binance:ETHUSDT)
+        val scheme = uri.scheme?.uppercase()
+        val ssp = uri.schemeSpecificPart?.trim()
+        if (!scheme.isNullOrBlank() && !ssp.isNullOrBlank()) {
+            val knownExchanges = setOf("BINANCE", "BITSTAMP", "COINBASE", "BYBIT", "OKX", "KRAKEN", "CRYPTOCAP", "MEXC", "KUCOIN", "GATEIO", "BITFINEX")
+            if (knownExchanges.contains(scheme)) {
+                return cleanSymbolFormat("$scheme:$ssp")
+            }
         }
 
         val tvWidgetSymbol = uri.getQueryParameter("tvwidgetsymbol")?.trim()
         if (!tvWidgetSymbol.isNullOrBlank()) {
             return cleanSymbolFormat(tvWidgetSymbol)
+        }
+
+        val querySymbol = uri.getQueryParameter("symbol")?.trim()
+        if (!querySymbol.isNullOrBlank()) {
+            return cleanSymbolFormat(querySymbol)
         }
 
         val pathSegments = uri.pathSegments ?: emptyList()
@@ -499,8 +610,29 @@ internal fun parseTradingViewSymbol(uri: android.net.Uri): String? {
         val chartIndex = pathSegments.indexOf("chart")
         if (chartIndex != -1 && chartIndex + 1 < pathSegments.size) {
             val candidate = pathSegments[chartIndex + 1].trim()
-            if (candidate.length in 2..20 && !candidate.equals("embed", ignoreCase = true)) {
+            if (candidate.length in 2..24 && !candidate.equals("embed", ignoreCase = true)) {
                 return cleanSymbolFormat(candidate)
+            }
+        }
+
+        val fullUrl = uri.toString()
+        if (fullUrl.contains("/markets/cryptocurrencies/prices-")) {
+            val after = fullUrl.substringAfter("/markets/cryptocurrencies/prices-").substringBefore("/").substringBefore("?")
+            if (after.isNotBlank()) {
+                return cleanSymbolFormat(after)
+            }
+        }
+
+        val fragment = uri.fragment
+        if (!fragment.isNullOrBlank()) {
+            if (fragment.contains("symbol=")) {
+                val extracted = fragment.substringAfter("symbol=").substringBefore("&").trim()
+                if (extracted.isNotBlank()) return cleanSymbolFormat(extracted)
+            } else if (fragment.contains("tvwidgetsymbol=")) {
+                val extracted = fragment.substringAfter("tvwidgetsymbol=").substringBefore("&").trim()
+                if (extracted.isNotBlank()) return cleanSymbolFormat(extracted)
+            } else if (fragment.contains(":")) {
+                return cleanSymbolFormat(fragment)
             }
         }
 

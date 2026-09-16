@@ -10,9 +10,13 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +24,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CandlestickChart
@@ -180,7 +188,7 @@ fun CryptoApp(
                                 AppTab.WATCHLIST -> "My Watchlist"
                                 AppTab.DICTIONARY -> "Crypto Dictionary"
                                 AppTab.CALCULATORS -> "Crypto Calculators"
-                                AppTab.EDUCATION -> "Education Hub"
+                                AppTab.EDUCATION -> "Learning Portal"
                                 AppTab.AI_HUB -> "AI Hub"
                             }
 
@@ -191,10 +199,10 @@ fun CryptoApp(
                                 AppTab.HEATMAP -> "Top Market Cap Coins Treemap"
                                 AppTab.MARKETS -> "Top Movers & 24h Volume"
                                 AppTab.WATCHLIST -> "${uiState.coins.count { it.isFavorite }} Starred Assets"
-                                AppTab.DICTIONARY -> "1,000+ Words & Examples"
-                                AppTab.CALCULATORS -> "7 Precision Tools & Keypad"
-                                AppTab.EDUCATION -> "Academy & Practice Quiz"
-                                AppTab.AI_HUB -> "Gemini 3.5 AI Assistant"
+                                AppTab.DICTIONARY -> "1,000+ Words & Practical Examples"
+                                AppTab.CALCULATORS -> "7 Precision Tools & Interactive Keypad"
+                                AppTab.EDUCATION -> "Academy Modules & Practice Quizzes"
+                                AppTab.AI_HUB -> "Gemini AI Trading Assistant"
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -206,6 +214,9 @@ fun CryptoApp(
                                             when (uiState.currentTab) {
                                                 AppTab.ADVANCED_SCREENER -> CryptoAccentCyan
                                                 AppTab.WATCHLIST -> CryptoAccentGold
+                                                AppTab.CALCULATORS -> CryptoAccentGold
+                                                AppTab.DICTIONARY -> CryptoAccentCyan
+                                                AppTab.EDUCATION -> CryptoGreen
                                                 else -> MaterialTheme.colorScheme.primary
                                             }
                                         ),
@@ -219,7 +230,10 @@ fun CryptoApp(
                                             AppTab.HEATMAP -> Icons.Default.GridView
                                             AppTab.MARKETS -> Icons.Default.CurrencyExchange
                                             AppTab.WATCHLIST -> Icons.Default.Star
-                                            else -> Icons.Default.QueryStats
+                                            AppTab.CALCULATORS -> Icons.Default.Calculate
+                                            AppTab.DICTIONARY -> Icons.AutoMirrored.Filled.MenuBook
+                                            AppTab.EDUCATION -> Icons.Default.School
+                                            AppTab.AI_HUB -> Icons.Default.AutoAwesome
                                         },
                                         contentDescription = null,
                                         tint = Color.White,
@@ -284,45 +298,6 @@ fun CryptoApp(
                         )
 
                         NavigationBarItem(
-                            selected = uiState.currentTab == AppTab.SCREENER,
-                            onClick = { viewModel.setTab(AppTab.SCREENER) },
-                            icon = { Icon(Icons.Default.Tune, contentDescription = "Screener") },
-                            label = { Text("Screener", fontSize = 10.sp) },
-                            modifier = Modifier.testTag("nav_tab_screener"),
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-
-                        NavigationBarItem(
-                            selected = uiState.currentTab == AppTab.ADVANCED_SCREENER,
-                            onClick = { viewModel.setTab(AppTab.ADVANCED_SCREENER) },
-                            icon = { Icon(Icons.Default.FilterAlt, contentDescription = "Adv Screener") },
-                            label = { Text("Adv Screener", fontSize = 10.sp, fontWeight = FontWeight.SemiBold) },
-                            modifier = Modifier.testTag("nav_tab_advanced_screener"),
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = CryptoAccentCyan,
-                                selectedTextColor = CryptoAccentCyan,
-                                indicatorColor = CryptoAccentCyan.copy(alpha = 0.2f)
-                            )
-                        )
-
-                        NavigationBarItem(
-                            selected = uiState.currentTab == AppTab.HEATMAP,
-                            onClick = { viewModel.setTab(AppTab.HEATMAP) },
-                            icon = { Icon(Icons.Default.GridView, contentDescription = "Heatmap") },
-                            label = { Text("Heatmap", fontSize = 10.sp) },
-                            modifier = Modifier.testTag("nav_tab_heatmap"),
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-
-                        NavigationBarItem(
                             selected = uiState.currentTab == AppTab.MARKETS,
                             onClick = { viewModel.setTab(AppTab.MARKETS) },
                             icon = { Icon(Icons.Default.CurrencyExchange, contentDescription = "Markets") },
@@ -332,6 +307,45 @@ fun CryptoApp(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
                                 indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.CALCULATORS,
+                            onClick = { viewModel.setTab(AppTab.CALCULATORS) },
+                            icon = { Icon(Icons.Default.Calculate, contentDescription = "Calculators") },
+                            label = { Text("Calculator", fontSize = 10.sp, fontWeight = FontWeight.SemiBold) },
+                            modifier = Modifier.testTag("nav_tab_calculators"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoAccentGold,
+                                selectedTextColor = CryptoAccentGold,
+                                indicatorColor = CryptoAccentGold.copy(alpha = 0.2f)
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.DICTIONARY,
+                            onClick = { viewModel.setTab(AppTab.DICTIONARY) },
+                            icon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = "Dictionary") },
+                            label = { Text("Dictionary", fontSize = 10.sp, fontWeight = FontWeight.SemiBold) },
+                            modifier = Modifier.testTag("nav_tab_dictionary"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoAccentCyan,
+                                selectedTextColor = CryptoAccentCyan,
+                                indicatorColor = CryptoAccentCyan.copy(alpha = 0.2f)
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.EDUCATION,
+                            onClick = { viewModel.setTab(AppTab.EDUCATION) },
+                            icon = { Icon(Icons.Default.School, contentDescription = "Learning Portal") },
+                            label = { Text("Learning", fontSize = 10.sp, fontWeight = FontWeight.SemiBold) },
+                            modifier = Modifier.testTag("nav_tab_education"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoGreen,
+                                selectedTextColor = CryptoGreen,
+                                indicatorColor = CryptoGreen.copy(alpha = 0.2f)
                             )
                         )
                     }
@@ -353,6 +367,13 @@ fun CryptoApp(
                         onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
                         onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
                     )
+
+                    // Quick Access Hub Bar
+                    QuickAccessHubBar(
+                        currentTab = uiState.currentTab,
+                        watchlistCount = uiState.coins.count { it.isFavorite },
+                        onTabSelected = { viewModel.setTab(it) }
+                    )
                 }
 
                 // Animated Screen Switching
@@ -370,7 +391,7 @@ fun CryptoApp(
                                 isTvMode = uiState.isTvOverviewMode,
                                 isDarkTheme = uiState.isDarkTheme,
                                 onToggleTvMode = { viewModel.toggleTvOverviewMode() },
-                                onCoinClick = { coin -> viewModel.selectCoin(coin) },
+                                onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
                                 onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
                                 onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
                             )
@@ -378,7 +399,7 @@ fun CryptoApp(
                         AppTab.WATCHLIST -> {
                             WatchlistScreen(
                                 coins = uiState.coins,
-                                onCoinClick = { coin -> viewModel.selectCoin(coin) },
+                                onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
                                 onChartClick = { coin -> viewModel.openChartForCoin(coin) },
                                 onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
                                 onExploreCoins = { viewModel.setTab(AppTab.MARKETS) }

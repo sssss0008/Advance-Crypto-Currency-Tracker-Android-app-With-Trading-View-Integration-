@@ -89,13 +89,13 @@ fun CryptoEducationScreen() {
         ) {
             Column {
                 Text(
-                    text = "Education Hub",
+                    text = "Learning Portal",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Master Blockchain, DeFi, TA & Trading",
+                    text = "Master Blockchain, DeFi, TA & Trading Strategies",
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -117,7 +117,7 @@ fun CryptoEducationScreen() {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Academy",
+                        text = "Academy Hub",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = CryptoGreen

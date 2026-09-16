@@ -12,23 +12,12 @@ class CryptoApplication : Application() {
         private const val TAG = "CryptoApplication"
 
         init {
-            setupGraphicsEnvironment()
-        }
-
-        fun setupGraphicsEnvironment() {
             try {
-                // Configure Mesa driver environment to prevent searching for non-existent DRM render nodes in containerized emulator
-                Os.setenv("LIBGL_DRI3_DISABLE", "1", true)
-                Os.setenv("LIBGL_KMS_DRI3_DISABLE", "1", true)
-                Os.setenv("MESA_LOADER_DRIVER_OVERRIDE", "swrast", true)
-                Os.setenv("GALLIUM_DRIVER", "llvmpipe", true)
+                // Force Mesa to use software rendering path directly, avoiding failed attempts
+                // to open non-existent DRM render nodes (/dev/dri/renderD128) in virtualized containers.
                 Os.setenv("LIBGL_ALWAYS_SOFTWARE", "1", true)
-                Os.setenv("MESA_DEBUG", "silent", true)
-                Os.setenv("MESA_LOG_FILE", "/dev/null", true)
-                Os.setenv("EGL_LOG_LEVEL", "fatal", true)
-                Os.setenv("LIBGL_DRIVERS_PATH", "/dev/null", true)
             } catch (e: Throwable) {
-                Log.w(TAG, "Failed setting MESA environment variables", e)
+                Log.w(TAG, "Failed setting graphics environment", e)
             }
         }
 
@@ -60,7 +49,6 @@ class CryptoApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        setupGraphicsEnvironment()
         ensureWebViewCacheDirectories(this)
     }
 }

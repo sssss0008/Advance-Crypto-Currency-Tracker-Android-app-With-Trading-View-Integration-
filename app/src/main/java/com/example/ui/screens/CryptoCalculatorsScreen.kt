@@ -138,7 +138,7 @@ fun CryptoCalculatorsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(CalculatorType.values().toList()) { calc ->
+            items(CalculatorType.entries) { calc ->
                 val isSelected = calc == selectedCalc
                 FilterChip(
                     selected = isSelected,
