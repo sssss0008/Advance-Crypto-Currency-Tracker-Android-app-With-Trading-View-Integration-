@@ -20,10 +20,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 enum class AppTab(val title: String) {
-    MARKETS("Markets"),
-    HEATMAP("Heatmap"),
-    SCREENER("Screener"),
     CHART("Charts"),
+    SCREENER("Screener"),
+    ADVANCED_SCREENER("Advanced Screener"),
+    HEATMAP("Heatmap"),
+    MARKETS("Markets"),
     WATCHLIST("Watchlist"),
     DICTIONARY("Dictionary"),
     CALCULATORS("Calculators"),
@@ -34,15 +35,15 @@ enum class AppTab(val title: String) {
 data class CryptoUiState(
     val coins: List<CryptoCoin> = emptyList(),
     val metrics: MarketOverviewMetrics = MarketOverviewMetrics(),
-    val currentTab: AppTab = AppTab.MARKETS,
+    val currentTab: AppTab = AppTab.CHART,
     val selectedCoin: CryptoCoin? = null,
     val isDarkTheme: Boolean = true,
-    // Toggles between Native and TradingView Embed
-    val isTvOverviewMode: Boolean = false,
-    val isTvHeatmapMode: Boolean = false,
-    val isTvScreenerMode: Boolean = false,
-    val isTvTickerMode: Boolean = false,
-    val isTvChartMode: Boolean = false,
+    // Toggles between Native and TradingView Embed - default to TradingView widgets
+    val isTvOverviewMode: Boolean = true,
+    val isTvHeatmapMode: Boolean = true,
+    val isTvScreenerMode: Boolean = true,
+    val isTvTickerMode: Boolean = true,
+    val isTvChartMode: Boolean = true,
     // Filters & Sorting
     val searchQuery: String = "",
     val selectedCategory: CryptoCategory = CryptoCategory.ALL,

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CandlestickChart
 import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Menu
@@ -70,6 +71,7 @@ import com.example.ui.CryptoViewModel
 import com.example.ui.components.AppDrawerContent
 import com.example.ui.components.CryptoDetailModal
 import com.example.ui.components.TickerTapeBar
+import com.example.ui.screens.CryptoAdvancedScreenerScreen
 import com.example.ui.screens.CryptoAiHubScreen
 import com.example.ui.screens.CryptoCalculatorsScreen
 import com.example.ui.screens.CryptoChartScreen
@@ -170,27 +172,29 @@ fun CryptoApp(
                         },
                         title = {
                             val headerTitle = when (uiState.currentTab) {
+                                AppTab.CHART -> "TradingView Charts"
+                                AppTab.SCREENER -> "Crypto Screener"
+                                AppTab.ADVANCED_SCREENER -> "Advanced Screener"
+                                AppTab.HEATMAP -> "Visual Heatmap"
                                 AppTab.MARKETS -> "Crypto Markets"
                                 AppTab.WATCHLIST -> "My Watchlist"
                                 AppTab.DICTIONARY -> "Crypto Dictionary"
                                 AppTab.CALCULATORS -> "Crypto Calculators"
                                 AppTab.EDUCATION -> "Education Hub"
                                 AppTab.AI_HUB -> "AI Hub"
-                                AppTab.HEATMAP -> "Visual Heatmap"
-                                AppTab.SCREENER -> "Crypto Screener"
-                                AppTab.CHART -> "Live Charts"
                             }
 
                             val headerSubtitle = when (uiState.currentTab) {
-                                AppTab.MARKETS -> "Movers & Volume"
+                                AppTab.CHART -> "Live Interactive Technical Charts"
+                                AppTab.SCREENER -> "TradingView Crypto Screener"
+                                AppTab.ADVANCED_SCREENER -> "Multi-Metric Screener & Overview"
+                                AppTab.HEATMAP -> "Top Market Cap Coins Treemap"
+                                AppTab.MARKETS -> "Top Movers & 24h Volume"
                                 AppTab.WATCHLIST -> "${uiState.coins.count { it.isFavorite }} Starred Assets"
                                 AppTab.DICTIONARY -> "1,000+ Words & Examples"
                                 AppTab.CALCULATORS -> "7 Precision Tools & Keypad"
                                 AppTab.EDUCATION -> "Academy & Practice Quiz"
                                 AppTab.AI_HUB -> "Gemini 3.5 AI Assistant"
-                                AppTab.HEATMAP -> "Top Market Cap Treemap"
-                                AppTab.SCREENER -> "Custom Filters & Metrics"
-                                AppTab.CHART -> "Interactive TradingView"
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -200,10 +204,8 @@ fun CryptoApp(
                                         .clip(CircleShape)
                                         .background(
                                             when (uiState.currentTab) {
-                                                AppTab.AI_HUB -> CryptoPrimary
+                                                AppTab.ADVANCED_SCREENER -> CryptoAccentCyan
                                                 AppTab.WATCHLIST -> CryptoAccentGold
-                                                AppTab.DICTIONARY -> CryptoAccentCyan
-                                                AppTab.EDUCATION -> CryptoGreen
                                                 else -> MaterialTheme.colorScheme.primary
                                             }
                                         ),
@@ -211,15 +213,13 @@ fun CryptoApp(
                                 ) {
                                     Icon(
                                         imageVector = when (uiState.currentTab) {
-                                            AppTab.AI_HUB -> Icons.Default.AutoAwesome
-                                            AppTab.WATCHLIST -> Icons.Default.Star
-                                            AppTab.DICTIONARY -> Icons.Default.MenuBook
-                                            AppTab.CALCULATORS -> Icons.Default.Calculate
-                                            AppTab.EDUCATION -> Icons.Default.School
-                                            AppTab.HEATMAP -> Icons.Default.GridView
-                                            AppTab.SCREENER -> Icons.Default.Tune
                                             AppTab.CHART -> Icons.Default.CandlestickChart
-                                            else -> Icons.Default.CurrencyExchange
+                                            AppTab.SCREENER -> Icons.Default.Tune
+                                            AppTab.ADVANCED_SCREENER -> Icons.Default.FilterAlt
+                                            AppTab.HEATMAP -> Icons.Default.GridView
+                                            AppTab.MARKETS -> Icons.Default.CurrencyExchange
+                                            AppTab.WATCHLIST -> Icons.Default.Star
+                                            else -> Icons.Default.QueryStats
                                         },
                                         contentDescription = null,
                                         tint = Color.White,
@@ -246,17 +246,6 @@ fun CryptoApp(
                         },
                         actions = {
                             IconButton(
-                                onClick = { viewModel.setTab(AppTab.AI_HUB) },
-                                modifier = Modifier.testTag("header_ai_hub_btn")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "AI Hub",
-                                    tint = CryptoPrimary
-                                )
-                            }
-
-                            IconButton(
                                 onClick = { viewModel.toggleTheme() },
                                 modifier = Modifier.testTag("theme_toggle_btn")
                             ) {
@@ -282,32 +271,6 @@ fun CryptoApp(
                         modifier = Modifier.testTag("bottom_nav_bar")
                     ) {
                         NavigationBarItem(
-                            selected = uiState.currentTab == AppTab.MARKETS,
-                            onClick = { viewModel.setTab(AppTab.MARKETS) },
-                            icon = { Icon(Icons.Default.CurrencyExchange, contentDescription = "Markets") },
-                            label = { Text("Markets", fontSize = 10.sp) },
-                            modifier = Modifier.testTag("nav_tab_markets"),
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-
-                        NavigationBarItem(
-                            selected = uiState.currentTab == AppTab.WATCHLIST,
-                            onClick = { viewModel.setTab(AppTab.WATCHLIST) },
-                            icon = { Icon(Icons.Default.Star, contentDescription = "Watchlist") },
-                            label = { Text("Watchlist", fontSize = 10.sp) },
-                            modifier = Modifier.testTag("nav_tab_watchlist"),
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = CryptoAccentGold,
-                                selectedTextColor = CryptoAccentGold,
-                                indicatorColor = CryptoAccentGold.copy(alpha = 0.2f)
-                            )
-                        )
-
-                        NavigationBarItem(
                             selected = uiState.currentTab == AppTab.CHART,
                             onClick = { viewModel.setTab(AppTab.CHART) },
                             icon = { Icon(Icons.Default.CandlestickChart, contentDescription = "Charts") },
@@ -321,28 +284,50 @@ fun CryptoApp(
                         )
 
                         NavigationBarItem(
-                            selected = uiState.currentTab == AppTab.AI_HUB,
-                            onClick = { viewModel.setTab(AppTab.AI_HUB) },
-                            icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "AI") },
-                            label = { Text("AI", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
-                            modifier = Modifier.testTag("nav_tab_ai_hub"),
+                            selected = uiState.currentTab == AppTab.SCREENER,
+                            onClick = { viewModel.setTab(AppTab.SCREENER) },
+                            icon = { Icon(Icons.Default.Tune, contentDescription = "Screener") },
+                            label = { Text("Screener", fontSize = 10.sp) },
+                            modifier = Modifier.testTag("nav_tab_screener"),
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = CryptoPrimary,
-                                selectedTextColor = CryptoPrimary,
-                                indicatorColor = CryptoPrimary.copy(alpha = 0.2f)
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
                             )
                         )
 
                         NavigationBarItem(
-                            selected = false,
-                            onClick = {
-                                scope.launch {
-                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                }
-                            },
-                            icon = { Icon(Icons.Default.Menu, contentDescription = "All Hubs") },
-                            label = { Text("Hubs", fontSize = 10.sp) },
-                            modifier = Modifier.testTag("nav_tab_drawer_menu"),
+                            selected = uiState.currentTab == AppTab.ADVANCED_SCREENER,
+                            onClick = { viewModel.setTab(AppTab.ADVANCED_SCREENER) },
+                            icon = { Icon(Icons.Default.FilterAlt, contentDescription = "Adv Screener") },
+                            label = { Text("Adv Screener", fontSize = 10.sp, fontWeight = FontWeight.SemiBold) },
+                            modifier = Modifier.testTag("nav_tab_advanced_screener"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoAccentCyan,
+                                selectedTextColor = CryptoAccentCyan,
+                                indicatorColor = CryptoAccentCyan.copy(alpha = 0.2f)
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.HEATMAP,
+                            onClick = { viewModel.setTab(AppTab.HEATMAP) },
+                            icon = { Icon(Icons.Default.GridView, contentDescription = "Heatmap") },
+                            label = { Text("Heatmap", fontSize = 10.sp) },
+                            modifier = Modifier.testTag("nav_tab_heatmap"),
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+
+                        NavigationBarItem(
+                            selected = uiState.currentTab == AppTab.MARKETS,
+                            onClick = { viewModel.setTab(AppTab.MARKETS) },
+                            icon = { Icon(Icons.Default.CurrencyExchange, contentDescription = "Markets") },
+                            label = { Text("Markets", fontSize = 10.sp) },
+                            modifier = Modifier.testTag("nav_tab_markets"),
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -444,6 +429,12 @@ fun CryptoApp(
                                 onToggleTvMode = { viewModel.toggleTvScreenerMode() },
                                 onCoinClick = { coin -> viewModel.openChartForCoin(coin) },
                                 onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
+                                onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
+                            )
+                        }
+                        AppTab.ADVANCED_SCREENER -> {
+                            CryptoAdvancedScreenerScreen(
+                                isDarkTheme = uiState.isDarkTheme,
                                 onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
                             )
                         }

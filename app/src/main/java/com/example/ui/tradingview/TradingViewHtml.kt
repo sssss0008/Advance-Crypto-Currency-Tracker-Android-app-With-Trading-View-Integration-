@@ -164,6 +164,33 @@ object TradingViewHtml {
         return wrapHtml(content, isDark)
     }
 
+    fun getAdvancedScreenerHtml(isDark: Boolean = true): String {
+        val theme = if (isDark) "dark" else "light"
+        val content = """
+            <!-- TradingView Widget BEGIN -->
+            <div class="tradingview-widget-container" style="width:100%;height:100%">
+              <div class="tradingview-widget-container__widget" style="width:100%;height:100%"></div>
+              <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/crypto-coins-screener/" rel="noopener nofollow" target="_blank"><span class="blue-text">Crypto Screener</span></a><span class="trademark"> by TradingView</span></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-screener.js" async>
+              {
+                "market": "crypto",
+                "showToolbar": true,
+                "defaultColumn": "overview",
+                "defaultScreen": "general",
+                "isTransparent": false,
+                "locale": "en",
+                "colorTheme": "$theme",
+                "largeChartUrl": "https://wealthorbitcenter.com/free-live-trading-real-time-chart-stocks-forex-crypto/",
+                "width": "100%",
+                "height": "100%"
+              }
+              </script>
+            </div>
+            <!-- TradingView Widget END -->
+        """.trimIndent()
+        return wrapHtml(content, isDark)
+    }
+
     fun getAdvancedChartHtml(
         symbol: String = "BITSTAMP:BTCUSD",
         isDark: Boolean = true

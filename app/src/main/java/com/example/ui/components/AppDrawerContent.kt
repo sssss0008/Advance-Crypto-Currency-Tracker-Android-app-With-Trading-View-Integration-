@@ -172,9 +172,9 @@ fun AppDrawerContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // SECTION 1: USER REQUESTED SPECIALIZED HUBS
+            // SECTION: TRADINGVIEW TOOLS & WIDGETS
             Text(
-                text = "SPECIALIZED HUBS",
+                text = "TRADINGVIEW TOOLS",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -182,9 +182,122 @@ fun AppDrawerContent(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
             )
 
+            // Advanced Screener (Requested TradingView Screener Embed)
+            NavigationDrawerItem(
+                label = { Text("Advanced Screener", fontWeight = FontWeight.SemiBold) },
+                selected = currentTab == AppTab.ADVANCED_SCREENER,
+                onClick = {
+                    onTabSelected(AppTab.ADVANCED_SCREENER)
+                    onCloseDrawer()
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.FilterAlt,
+                        contentDescription = null,
+                        tint = CryptoAccentCyan
+                    )
+                },
+                badge = {
+                    Surface(
+                        color = CryptoAccentCyan.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "TV Screener",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CryptoAccentCyan,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier.testTag("drawer_item_advanced_screener")
+            )
+
+            // TradingView Charts
+            NavigationDrawerItem(
+                label = { Text("TradingView Charts", fontWeight = FontWeight.SemiBold) },
+                selected = currentTab == AppTab.CHART,
+                onClick = {
+                    onTabSelected(AppTab.CHART)
+                    onCloseDrawer()
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.CandlestickChart,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                badge = {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "Interactive",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier.testTag("drawer_item_charts")
+            )
+
+            // Crypto Screener
+            NavigationDrawerItem(
+                label = { Text("Crypto Screener") },
+                selected = currentTab == AppTab.SCREENER,
+                onClick = {
+                    onTabSelected(AppTab.SCREENER)
+                    onCloseDrawer()
+                },
+                icon = { Icon(Icons.Default.FilterAlt, contentDescription = null) },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.testTag("drawer_item_screener")
+            )
+
+            // Visual Heatmap
+            NavigationDrawerItem(
+                label = { Text("Visual Heatmap") },
+                selected = currentTab == AppTab.HEATMAP,
+                onClick = {
+                    onTabSelected(AppTab.HEATMAP)
+                    onCloseDrawer()
+                },
+                icon = { Icon(Icons.Default.GridView, contentDescription = null) },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.testTag("drawer_item_heatmap")
+            )
+
+            // Market Overview
+            NavigationDrawerItem(
+                label = { Text("Market Movers & Overview") },
+                selected = currentTab == AppTab.MARKETS,
+                onClick = {
+                    onTabSelected(AppTab.MARKETS)
+                    onCloseDrawer()
+                },
+                icon = { Icon(Icons.Default.CurrencyExchange, contentDescription = null) },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.testTag("drawer_item_markets")
+            )
+
             // Watchlist
             NavigationDrawerItem(
-                label = { Text("My Watchlist", fontWeight = FontWeight.SemiBold) },
+                label = { Text("My Watchlist") },
                 selected = currentTab == AppTab.WATCHLIST,
                 onClick = {
                     onTabSelected(AppTab.WATCHLIST)
@@ -198,235 +311,23 @@ fun AppDrawerContent(
                     )
                 },
                 badge = {
-                    Surface(
-                        color = CryptoAccentGold.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "${favoriteCoins.size} Starred",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CryptoAccentGold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
+                    if (favoriteCoins.isNotEmpty()) {
+                        Surface(
+                            color = CryptoAccentGold.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text(
+                                text = "${favoriteCoins.size} Starred",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = CryptoAccentGold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
                     }
                 },
                 shape = RoundedCornerShape(12.dp),
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
                 modifier = Modifier.testTag("drawer_item_watchlist")
-            )
-
-            // Crypto Dictionary
-            NavigationDrawerItem(
-                label = { Text("Crypto Dictionary", fontWeight = FontWeight.SemiBold) },
-                selected = currentTab == AppTab.DICTIONARY,
-                onClick = {
-                    onTabSelected(AppTab.DICTIONARY)
-                    onCloseDrawer()
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.MenuBook,
-                        contentDescription = null,
-                        tint = CryptoAccentCyan
-                    )
-                },
-                badge = {
-                    Surface(
-                        color = CryptoAccentCyan.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "1000+ Words",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CryptoAccentCyan,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.testTag("drawer_item_dictionary")
-            )
-
-            // Crypto Calculators
-            NavigationDrawerItem(
-                label = { Text("Crypto Calculators", fontWeight = FontWeight.SemiBold) },
-                selected = currentTab == AppTab.CALCULATORS,
-                onClick = {
-                    onTabSelected(AppTab.CALCULATORS)
-                    onCloseDrawer()
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Calculate,
-                        contentDescription = null,
-                        tint = CryptoAccentGold
-                    )
-                },
-                badge = {
-                    Surface(
-                        color = CryptoAccentGold.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "7 Tools & Keypad",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CryptoAccentGold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.testTag("drawer_item_calculators")
-            )
-
-            // Education Hub
-            NavigationDrawerItem(
-                label = { Text("Education Hub", fontWeight = FontWeight.SemiBold) },
-                selected = currentTab == AppTab.EDUCATION,
-                onClick = {
-                    onTabSelected(AppTab.EDUCATION)
-                    onCloseDrawer()
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.School,
-                        contentDescription = null,
-                        tint = CryptoGreen
-                    )
-                },
-                badge = {
-                    Surface(
-                        color = CryptoGreen.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "Learn & Quiz",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CryptoGreen,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.testTag("drawer_item_education")
-            )
-
-            // AI Intelligence Hub
-            NavigationDrawerItem(
-                label = { Text("AI Intelligence Hub", fontWeight = FontWeight.SemiBold) },
-                selected = currentTab == AppTab.AI_HUB,
-                onClick = {
-                    onTabSelected(AppTab.AI_HUB)
-                    onCloseDrawer()
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        tint = CryptoPrimary
-                    )
-                },
-                badge = {
-                    Surface(
-                        color = CryptoPrimary.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = "Gemini AI",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = CryptoPrimary,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.testTag("drawer_item_ai_hub")
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-            HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.3f))
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // SECTION 2: CORE TRADING SCREENS
-            Text(
-                text = "TRADING & MARKETS",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 1.sp,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-            )
-
-            NavigationDrawerItem(
-                label = { Text("Crypto Markets") },
-                selected = currentTab == AppTab.MARKETS,
-                onClick = {
-                    onTabSelected(AppTab.MARKETS)
-                    onCloseDrawer()
-                },
-                icon = { Icon(Icons.Default.CurrencyExchange, contentDescription = null) },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.testTag("drawer_item_markets")
-            )
-
-            NavigationDrawerItem(
-                label = { Text("TradingView Charts") },
-                selected = currentTab == AppTab.CHART,
-                onClick = {
-                    onTabSelected(AppTab.CHART)
-                    onCloseDrawer()
-                },
-                icon = { Icon(Icons.Default.CandlestickChart, contentDescription = null) },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.testTag("drawer_item_charts")
-            )
-
-            NavigationDrawerItem(
-                label = { Text("Crypto Screener") },
-                selected = currentTab == AppTab.SCREENER,
-                onClick = {
-                    onTabSelected(AppTab.SCREENER)
-                    onCloseDrawer()
-                },
-                icon = { Icon(Icons.Default.FilterAlt, contentDescription = null) },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.testTag("drawer_item_screener")
-            )
-
-            NavigationDrawerItem(
-                label = { Text("Visual Heatmap") },
-                selected = currentTab == AppTab.HEATMAP,
-                onClick = {
-                    onTabSelected(AppTab.HEATMAP)
-                    onCloseDrawer()
-                },
-                icon = { Icon(Icons.Default.GridView, contentDescription = null) },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.testTag("drawer_item_heatmap")
             )
 
             // Watchlist peek row if favorites exist
