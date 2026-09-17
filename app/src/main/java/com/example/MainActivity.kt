@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        CryptoApplication.applyGraphicsEnvironment()
         super.onCreate(savedInstanceState)
         CryptoApplication.ensureWebViewCacheDirectories(this)
         enableEdgeToEdge()

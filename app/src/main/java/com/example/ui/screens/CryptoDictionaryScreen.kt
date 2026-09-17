@@ -22,9 +22,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CandlestickChart
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.SentimentSatisfiedAlt
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -47,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -58,6 +70,22 @@ import com.example.ui.theme.CryptoAccentCyan
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoPrimary
 import kotlinx.coroutines.launch
+
+private fun getDictionaryCategoryIcon(category: String): ImageVector {
+    return when {
+        category == CryptoDictionaryCategories.ALL -> Icons.Default.AllInclusive
+        category.contains("DeFi", ignoreCase = true) -> Icons.Default.AccountBalance
+        category.contains("Trading", ignoreCase = true) -> Icons.Default.CandlestickChart
+        category.contains("Security", ignoreCase = true) -> Icons.Default.Security
+        category.contains("Consensus", ignoreCase = true) || category.contains("L1", ignoreCase = true) -> Icons.Default.Hub
+        category.contains("Tokenomics", ignoreCase = true) -> Icons.Default.Savings
+        category.contains("Web3", ignoreCase = true) || category.contains("DAO", ignoreCase = true) -> Icons.Default.Groups
+        category.contains("Regulation", ignoreCase = true) || category.contains("Legal", ignoreCase = true) -> Icons.Default.Gavel
+        category.contains("Slang", ignoreCase = true) || category.contains("Culture", ignoreCase = true) -> Icons.Default.SentimentSatisfiedAlt
+        category.contains("NFT", ignoreCase = true) || category.contains("Gaming", ignoreCase = true) -> Icons.Default.SportsEsports
+        else -> Icons.AutoMirrored.Filled.MenuBook
+    }
+}
 
 @Composable
 fun CryptoDictionaryScreen(
@@ -176,6 +204,14 @@ fun CryptoDictionaryScreen(
                 FilterChip(
                     selected = isSelected,
                     onClick = { selectedCategory = cat },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = getDictionaryCategoryIcon(cat),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     label = {
                         Text(
                             text = if (cat == CryptoDictionaryCategories.ALL) "All (${allEntries.size})" else cat,
@@ -310,13 +346,24 @@ private fun DictionaryCard(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(
-                        text = entry.category,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = getDictionaryCategoryIcon(entry.category),
+                            contentDescription = null,
+                            modifier = Modifier.size(13.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = entry.category,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
 
@@ -338,12 +385,21 @@ private fun DictionaryCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
-                    Text(
-                        text = "💡 Real-World Example:",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CryptoAccentGold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Lightbulb,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = CryptoAccentGold
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Real-World Example:",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CryptoAccentGold
+                        )
+                    }
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = entry.example,

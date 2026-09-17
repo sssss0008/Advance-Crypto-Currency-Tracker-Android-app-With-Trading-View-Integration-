@@ -48,6 +48,21 @@ object TradingViewHtml {
                 </style>
                 <script>
                     (function() {
+                        // Environment safeguard:
+                        // Intercept WebGL context creation to prevent Mesa driver crashes (/dev/dri/renderD128)
+                        // in virtualized Android containers, gracefully guiding TradingView to its standard Canvas2D engine.
+                        try {
+                            if (window.HTMLCanvasElement && HTMLCanvasElement.prototype) {
+                                var origGetCtx = HTMLCanvasElement.prototype.getContext;
+                                HTMLCanvasElement.prototype.getContext = function(type, attrs) {
+                                    if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
+                                        return null;
+                                    }
+                                    return origGetCtx.apply(this, arguments);
+                                };
+                            }
+                        } catch(e) {}
+
                         function isSymbolUrl(url) {
                             if (!url || typeof url !== 'string') return false;
                             return url.indexOf('/symbols/') !== -1 ||

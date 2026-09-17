@@ -22,9 +22,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.PrecisionManufacturing
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -49,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,14 +71,14 @@ import com.example.ui.theme.CryptoRed
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-enum class CalculatorType(val displayName: String) {
-    KEYPAD("Keypad & Converter"),
-    PNL("Profit / Loss & ROI"),
-    DCA("DCA Simulator"),
-    STAKING("Staking Yield"),
-    LEVERAGE("Futures & Liquidation"),
-    IMPERMANENT_LOSS("Impermanent Loss"),
-    MINING("Mining Economics")
+enum class CalculatorType(val displayName: String, val icon: ImageVector) {
+    KEYPAD("Keypad & Converter", Icons.Default.Calculate),
+    PNL("Profit / Loss & ROI", Icons.Default.TrendingUp),
+    DCA("DCA Simulator", Icons.Default.Savings),
+    STAKING("Staking Yield", Icons.Default.AccountBalance),
+    LEVERAGE("Futures & Liquidation", Icons.Default.Bolt),
+    IMPERMANENT_LOSS("Impermanent Loss", Icons.Default.SwapHoriz),
+    MINING("Mining Economics", Icons.Default.PrecisionManufacturing)
 }
 
 @Composable
@@ -143,6 +150,14 @@ fun CryptoCalculatorsScreen(
                 FilterChip(
                     selected = isSelected,
                     onClick = { selectedCalc = calc },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = calc.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     label = {
                         Text(
                             text = calc.displayName,

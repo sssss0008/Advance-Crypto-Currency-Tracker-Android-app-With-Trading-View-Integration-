@@ -8,14 +8,31 @@ import java.io.File
 
 class CryptoApplication : Application() {
 
+    init {
+        applyGraphicsEnvironment()
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        applyGraphicsEnvironment()
+        super.attachBaseContext(base)
+    }
+
     companion object {
         private const val TAG = "CryptoApplication"
 
         init {
+            applyGraphicsEnvironment()
+        }
+
+        fun applyGraphicsEnvironment() {
             try {
-                // Force Mesa to use software rendering path directly, avoiding failed attempts
-                // to open non-existent DRM render nodes (/dev/dri/renderD128) in virtualized containers.
+                // Prevent Mesa from attempting to probe non-existent DRM render nodes (/dev/dri/renderD128)
+                // in virtualized Android containers and silence driver logging.
+                Os.setenv("MESA_LOG_FILE", "/dev/null", true)
+                Os.setenv("MESA_DEBUG", "silent", true)
+                Os.setenv("MESA_LOG_LEVEL", "none", true)
                 Os.setenv("LIBGL_ALWAYS_SOFTWARE", "1", true)
+                Os.setenv("GALLIUM_DRIVER", "softpipe", true)
             } catch (e: Throwable) {
                 Log.w(TAG, "Failed setting graphics environment", e)
             }

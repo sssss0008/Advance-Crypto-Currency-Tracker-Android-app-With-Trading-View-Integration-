@@ -23,13 +23,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.CandlestickChart
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -215,17 +220,37 @@ private fun LessonsListView(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val categoryIcon = when {
+                            module.category.contains("Blockchain", ignoreCase = true) -> Icons.Default.Hub
+                            module.category.contains("DeFi", ignoreCase = true) -> Icons.Default.AccountBalance
+                            module.category.contains("Technical", ignoreCase = true) -> Icons.Default.CandlestickChart
+                            module.category.contains("Trading", ignoreCase = true) -> Icons.Default.TrendingUp
+                            module.category.contains("Security", ignoreCase = true) -> Icons.Default.Security
+                            else -> Icons.AutoMirrored.Filled.MenuBook
+                        }
+
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text(
-                                text = module.category,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = categoryIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(13.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = module.category,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {

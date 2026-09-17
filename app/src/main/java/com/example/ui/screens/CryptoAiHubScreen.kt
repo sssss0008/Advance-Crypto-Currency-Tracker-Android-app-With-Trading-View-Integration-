@@ -20,13 +20,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CurrencyBitcoin
 import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,6 +71,12 @@ import com.example.ui.theme.CryptoPrimary
 import com.example.ui.theme.CryptoRed
 import kotlinx.coroutines.launch
 
+data class QuickAiPromptItem(
+    val label: String,
+    val prompt: String,
+    val icon: ImageVector
+)
+
 @Composable
 fun CryptoAiHubScreen(
     coins: List<CryptoCoin>,
@@ -78,11 +90,36 @@ fun CryptoAiHubScreen(
 
     val defaultQuickPrompts = remember {
         listOf(
-            "🌐 Market Sentiment Radar" to "Provide a real-time crypto market sentiment radar, macro regimes, and BTC dominance outlook.",
-            "🪙 Bitcoin Halving Cycle Analysis" to "Analyze Bitcoin's current market structure relative to previous post-halving bull cycles.",
-            "⟠ Ethereum L2 Scaling & Gas" to "Evaluate Ethereum Layer 2 adoption, blob economics, and ETH supply burn dynamics.",
-            "☀️ Solana Throughput & Catalysts" to "Break down Solana DEX volume, Firedancer validator upgrade, and ecosystem momentum.",
-            "⚠️ Crypto Risk & Leverage Flushes" to "What are the biggest macro risks and liquidation cascade zones in the crypto market right now?"
+            QuickAiPromptItem(
+                label = "Market Sentiment Radar",
+                prompt = "Provide a real-time crypto market sentiment radar, macro regimes, and BTC dominance outlook.",
+                icon = Icons.Default.Public
+            ),
+            QuickAiPromptItem(
+                label = "Bitcoin Halving Cycle",
+                prompt = "Analyze Bitcoin's current market structure relative to previous post-halving bull cycles.",
+                icon = Icons.Default.CurrencyBitcoin
+            ),
+            QuickAiPromptItem(
+                label = "Ethereum L2 Scaling & Gas",
+                prompt = "Evaluate Ethereum Layer 2 adoption, blob economics, and ETH supply burn dynamics.",
+                icon = Icons.Default.Layers
+            ),
+            QuickAiPromptItem(
+                label = "Solana Throughput & Catalysts",
+                prompt = "Break down Solana DEX volume, Firedancer validator upgrade, and ecosystem momentum.",
+                icon = Icons.Default.Speed
+            ),
+            QuickAiPromptItem(
+                label = "Risk & Liquidation Zones",
+                prompt = "What are the biggest macro risks and liquidation cascade zones in the crypto market right now?",
+                icon = Icons.Default.Warning
+            ),
+            QuickAiPromptItem(
+                label = "DeFi Yield & Staking Regimes",
+                prompt = "Compare real yields across Ethereum staking, Solana staking, and top lending protocols.",
+                icon = Icons.Default.AccountBalance
+            )
         )
     }
 
@@ -155,26 +192,37 @@ fun CryptoAiHubScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(defaultQuickPrompts) { (label, prompt) ->
+            items(defaultQuickPrompts) { item ->
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier.clickable {
-                        queryText = prompt
+                        queryText = item.prompt
                         isLoading = true
                         scope.launch {
-                            aiOutput = GeminiCryptoService.queryGemini(prompt)
+                            aiOutput = GeminiCryptoService.queryGemini(item.prompt)
                             isLoading = false
                         }
                     }
                 ) {
-                    Text(
-                        text = label,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = item.label,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -63,12 +64,34 @@ fun CryptoCoinVectorBadge(
                 "ATOM" -> drawCosmosBadge(center, radius)
                 "USDT", "USDT.D", "USD" -> drawTetherBadge(center, radius)
                 "ZEC" -> drawZcashBadge(center, radius)
+                "TRX" -> drawTronBadge(center, radius)
+                "SHIB" -> drawShibaBadge(center, radius)
+                "LTC" -> drawLitecoinBadge(center, radius)
+                "UNI" -> drawUniswapBadge(center, radius)
+                "BCH" -> drawBitcoinCashBadge(center, radius)
+                "PEPE" -> drawPepeBadge(center, radius)
+                "APT" -> drawAptosBadge(center, radius)
+                "ARB" -> drawArbitrumBadge(center, radius)
+                "OP" -> drawOptimismBadge(center, radius)
+                "TIA" -> drawCelestiaBadge(center, radius)
+                "RENDER" -> drawRenderBadge(center, radius)
+                "INJ" -> drawInjectiveBadge(center, radius)
+                "KAS" -> drawKaspaBadge(center, radius)
+                "FET" -> drawFetchBadge(center, radius)
                 else -> drawGenericCryptoBadge(cleanSymbol, center, radius)
             }
         }
 
         // For generic coins that fall into fallback, display monogram text on top
-        if (cleanSymbol !in listOf("BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "DOGE", "DOT", "AVAX", "LINK", "POL", "MATIC", "SUI", "NEAR", "ATOM", "USDT", "USDT.D", "USD", "ZEC")) {
+        val dedicatedVectorSymbols = remember {
+            setOf(
+                "BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "DOGE", "DOT", "AVAX", "LINK",
+                "POL", "MATIC", "SUI", "NEAR", "ATOM", "USDT", "USDT.D", "USD", "ZEC",
+                "TRX", "SHIB", "LTC", "UNI", "BCH", "PEPE", "APT", "ARB", "OP", "TIA",
+                "RENDER", "INJ", "KAS", "FET"
+            )
+        }
+        if (cleanSymbol !in dedicatedVectorSymbols) {
             val textSize = (size.value * 0.36f).sp
             Text(
                 text = cleanSymbol.take(3),
@@ -701,4 +724,325 @@ private fun DrawScope.drawGenericCryptoBadge(symbol: String, center: Offset, rad
         center = center,
         style = Stroke(width = 1.5f)
     )
+}
+
+// 18. Tron (TRX) Vector Badge
+private fun DrawScope.drawTronBadge(center: Offset, radius: Float) {
+    val tronRed = Color(0xFFE51A31)
+    val darkRed = Color(0xFFB00E20)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(tronRed, darkRed), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.65f
+    val path = Path().apply {
+        moveTo(center.x - s * 0.7f, center.y - s * 0.6f)
+        lineTo(center.x + s * 0.75f, center.y - s * 0.35f)
+        lineTo(center.x + s * 0.2f, center.y + s * 0.75f)
+        lineTo(center.x - s * 0.7f, center.y - s * 0.6f)
+        moveTo(center.x - s * 0.2f, center.y - s * 0.2f)
+        lineTo(center.x + s * 0.75f, center.y - s * 0.35f)
+    }
+    drawPath(path = path, color = Color.White, style = Stroke(width = radius * 0.12f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+}
+
+// 19. Shiba Inu (SHIB) Vector Badge
+private fun DrawScope.drawShibaBadge(center: Offset, radius: Float) {
+    val shibOrange = Color(0xFFF0851A)
+    val darkOrange = Color(0xFFC75D04)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(shibOrange, darkOrange), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    // Stylized Dog Silhouette / Crest Vector
+    val s = radius * 0.6f
+    val path = Path().apply {
+        // Left ear
+        moveTo(center.x - s * 0.7f, center.y - s * 0.6f)
+        lineTo(center.x - s * 0.3f, center.y - s * 0.1f)
+        // Right ear
+        lineTo(center.x + s * 0.3f, center.y - s * 0.1f)
+        lineTo(center.x + s * 0.7f, center.y - s * 0.6f)
+        // Cheek contours
+        lineTo(center.x + s * 0.55f, center.y + s * 0.3f)
+        lineTo(center.x, center.y + s * 0.65f)
+        lineTo(center.x - s * 0.55f, center.y + s * 0.3f)
+        close()
+    }
+    drawPath(path = path, color = Color.White, style = Stroke(width = radius * 0.11f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+    // Snout center dot
+    drawCircle(color = Color.White, radius = radius * 0.1f, center = Offset(center.x, center.y + s * 0.2f))
+}
+
+// 20. Litecoin (LTC) Vector Badge
+private fun DrawScope.drawLitecoinBadge(center: Offset, radius: Float) {
+    val ltcBlue = Color(0xFF345D9D)
+    val ltcDark = Color(0xFF223E6C)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(ltcBlue, ltcDark), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.65f
+    val strokeW = radius * 0.16f
+    // Bold 'L' path
+    val lPath = Path().apply {
+        moveTo(center.x - s * 0.25f, center.y - s * 0.65f)
+        lineTo(center.x - s * 0.25f, center.y + s * 0.6f)
+        lineTo(center.x + s * 0.45f, center.y + s * 0.6f)
+    }
+    drawPath(path = lPath, color = Color.White, style = Stroke(width = strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+    // Slanted slash crossbar
+    drawLine(
+        color = Color.White,
+        start = Offset(center.x - s * 0.5f, center.y + s * 0.1f),
+        end = Offset(center.x + s * 0.2f, center.y - s * 0.2f),
+        strokeWidth = strokeW * 0.9f,
+        cap = StrokeCap.Round
+    )
+}
+
+// 21. Uniswap (UNI) Vector Badge
+private fun DrawScope.drawUniswapBadge(center: Offset, radius: Float) {
+    val pink = Color(0xFFFF007A)
+    val darkPink = Color(0xFFC7005F)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(pink, darkPink), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.65f
+    // Unicorn horn / spiral vector
+    val hornPath = Path().apply {
+        moveTo(center.x - s * 0.45f, center.y + s * 0.5f)
+        quadraticTo(center.x - s * 0.1f, center.y - s * 0.1f, center.x + s * 0.6f, center.y - s * 0.65f)
+        quadraticTo(center.x + s * 0.1f, center.y + s * 0.1f, center.x + s * 0.35f, center.y + s * 0.55f)
+    }
+    drawPath(path = hornPath, color = Color.White, style = Stroke(width = radius * 0.14f, cap = StrokeCap.Round))
+}
+
+// 22. Bitcoin Cash (BCH) Vector Badge
+private fun DrawScope.drawBitcoinCashBadge(center: Offset, radius: Float) {
+    val bchGreen = Color(0xFF0AC18E)
+    val darkGreen = Color(0xFF067C5A)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(bchGreen, darkGreen), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.55f
+    val strokeW = radius * 0.13f
+    val stemX = center.x - s * 0.2f
+    drawLine(
+        color = Color.White,
+        start = Offset(stemX, center.y - s * 0.65f),
+        end = Offset(stemX, center.y + s * 0.65f),
+        strokeWidth = strokeW,
+        cap = StrokeCap.Round
+    )
+    val bumps = Path().apply {
+        moveTo(stemX, center.y - s * 0.55f)
+        cubicTo(center.x + s * 0.45f, center.y - s * 0.55f, center.x + s * 0.45f, center.y - s * 0.05f, stemX, center.y - s * 0.05f)
+        cubicTo(center.x + s * 0.55f, center.y - s * 0.05f, center.x + s * 0.55f, center.y + s * 0.55f, stemX, center.y + s * 0.55f)
+    }
+    drawPath(path = bumps, color = Color.White, style = Stroke(width = strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+}
+
+// 23. Pepe (PEPE) Vector Badge
+private fun DrawScope.drawPepeBadge(center: Offset, radius: Float) {
+    val pepeGreen = Color(0xFF4CAF50)
+    val darkPepe = Color(0xFF2E7D32)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(pepeGreen, darkPepe), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.55f
+    // Frog eye vectors
+    drawCircle(color = Color.White, radius = s * 0.35f, center = Offset(center.x - s * 0.45f, center.y - s * 0.25f))
+    drawCircle(color = Color(0xFF1B5E20), radius = s * 0.18f, center = Offset(center.x - s * 0.45f, center.y - s * 0.25f))
+    drawCircle(color = Color.White, radius = s * 0.35f, center = Offset(center.x + s * 0.45f, center.y - s * 0.25f))
+    drawCircle(color = Color(0xFF1B5E20), radius = s * 0.18f, center = Offset(center.x + s * 0.45f, center.y - s * 0.25f))
+    // Smile curve
+    val smilePath = Path().apply {
+        moveTo(center.x - s * 0.5f, center.y + s * 0.3f)
+        quadraticTo(center.x, center.y + s * 0.65f, center.x + s * 0.5f, center.y + s * 0.3f)
+    }
+    drawPath(path = smilePath, color = Color.White, style = Stroke(width = radius * 0.12f, cap = StrokeCap.Round))
+}
+
+// 24. Aptos (APT) Vector Badge
+private fun DrawScope.drawAptosBadge(center: Offset, radius: Float) {
+    val aptosBg = Color(0xFF1E293B)
+    drawCircle(color = aptosBg, radius = radius, center = center)
+    val s = radius * 0.6f
+    val strokeW = radius * 0.11f
+    // Aptos sliced ladder bars
+    val yOffsets = listOf(-0.5f, -0.15f, 0.2f, 0.55f)
+    val widths = listOf(0.45f, 0.7f, 0.85f, 0.6f)
+    yOffsets.forEachIndexed { i, yOff ->
+        val w = widths[i] * s
+        drawLine(
+            color = Color.White,
+            start = Offset(center.x - w, center.y + yOff * s),
+            end = Offset(center.x + w, center.y + yOff * s),
+            strokeWidth = strokeW,
+            cap = StrokeCap.Round
+        )
+    }
+}
+
+// 25. Arbitrum (ARB) Vector Badge
+private fun DrawScope.drawArbitrumBadge(center: Offset, radius: Float) {
+    val arbBlue = Color(0xFF28A0F0)
+    val arbDark = Color(0xFF1268A8)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(arbBlue, arbDark), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.65f
+    // Arbitrum prism vector
+    val path = Path().apply {
+        moveTo(center.x, center.y - s * 0.7f)
+        lineTo(center.x + s * 0.65f, center.y + s * 0.55f)
+        lineTo(center.x, center.y + s * 0.2f)
+        lineTo(center.x - s * 0.65f, center.y + s * 0.55f)
+        close()
+    }
+    drawPath(path = path, color = Color.White, style = Stroke(width = radius * 0.12f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+}
+
+// 26. Optimism (OP) Vector Badge
+private fun DrawScope.drawOptimismBadge(center: Offset, radius: Float) {
+    val opRed = Color(0xFFFF0420)
+    drawCircle(color = opRed, radius = radius, center = center)
+    val s = radius * 0.55f
+    val strokeW = radius * 0.15f
+    // 'O' Circle
+    drawCircle(
+        color = Color.White,
+        radius = s * 0.42f,
+        center = Offset(center.x - s * 0.45f, center.y),
+        style = Stroke(width = strokeW)
+    )
+    // 'P' Shape
+    val pPath = Path().apply {
+        moveTo(center.x + s * 0.2f, center.y + s * 0.5f)
+        lineTo(center.x + s * 0.2f, center.y - s * 0.5f)
+        cubicTo(center.x + s * 0.7f, center.y - s * 0.5f, center.x + s * 0.7f, center.y, center.x + s * 0.2f, center.y)
+    }
+    drawPath(path = pPath, color = Color.White, style = Stroke(width = strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+}
+
+// 27. Celestia (TIA) Vector Badge
+private fun DrawScope.drawCelestiaBadge(center: Offset, radius: Float) {
+    val tiaPurple = Color(0xFF7B2CBF)
+    val tiaPink = Color(0xFFE0AAFF)
+    drawCircle(
+        brush = Brush.linearGradient(colors = listOf(tiaPurple, tiaPink)),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.55f
+    // Modular square cluster
+    drawRect(color = Color.White, topLeft = Offset(center.x - s * 0.7f, center.y - s * 0.7f), size = androidx.compose.ui.geometry.Size(s * 0.6f, s * 0.6f))
+    drawRect(color = Color.White.copy(alpha = 0.85f), topLeft = Offset(center.x + s * 0.1f, center.y - s * 0.7f), size = androidx.compose.ui.geometry.Size(s * 0.6f, s * 0.6f))
+    drawRect(color = Color.White.copy(alpha = 0.85f), topLeft = Offset(center.x - s * 0.7f, center.y + s * 0.1f), size = androidx.compose.ui.geometry.Size(s * 0.6f, s * 0.6f))
+    drawRect(color = Color.White, topLeft = Offset(center.x + s * 0.1f, center.y + s * 0.1f), size = androidx.compose.ui.geometry.Size(s * 0.6f, s * 0.6f))
+}
+
+// 28. Render (RENDER) Vector Badge
+private fun DrawScope.drawRenderBadge(center: Offset, radius: Float) {
+    val renderRed = Color(0xFFE02424)
+    val renderOrange = Color(0xFFFF5A1F)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(renderOrange, renderRed), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.6f
+    // 3D Isometric cube rendering outline
+    val cubePath = Path().apply {
+        moveTo(center.x, center.y - s * 0.65f)
+        lineTo(center.x + s * 0.6f, center.y - s * 0.25f)
+        lineTo(center.x + s * 0.6f, center.y + s * 0.45f)
+        lineTo(center.x, center.y + s * 0.75f)
+        lineTo(center.x - s * 0.6f, center.y + s * 0.45f)
+        lineTo(center.x - s * 0.6f, center.y - s * 0.25f)
+        close()
+        moveTo(center.x, center.y - s * 0.65f)
+        lineTo(center.x, center.y + s * 0.1f)
+        lineTo(center.x + s * 0.6f, center.y - s * 0.25f)
+        moveTo(center.x, center.y + s * 0.1f)
+        lineTo(center.x - s * 0.6f, center.y - s * 0.25f)
+    }
+    drawPath(path = cubePath, color = Color.White, style = Stroke(width = radius * 0.1f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+}
+
+// 29. Injective (INJ) Vector Badge
+private fun DrawScope.drawInjectiveBadge(center: Offset, radius: Float) {
+    val injCyan = Color(0xFF00B4D8)
+    val injBlue = Color(0xFF0077B6)
+    drawCircle(
+        brush = Brush.linearGradient(colors = listOf(injCyan, injBlue)),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.6f
+    // Two interlocking bezier waves
+    val wave1 = Path().apply {
+        moveTo(center.x - s * 0.6f, center.y - s * 0.2f)
+        cubicTo(center.x - s * 0.2f, center.y - s * 0.7f, center.x + s * 0.2f, center.y + s * 0.5f, center.x + s * 0.6f, center.y - s * 0.1f)
+    }
+    drawPath(path = wave1, color = Color.White, style = Stroke(width = radius * 0.14f, cap = StrokeCap.Round))
+}
+
+// 30. Kaspa (KAS) Vector Badge
+private fun DrawScope.drawKaspaBadge(center: Offset, radius: Float) {
+    val kasTeal = Color(0xFF70C7BA)
+    val darkTeal = Color(0xFF439286)
+    drawCircle(
+        brush = Brush.radialGradient(colors = listOf(kasTeal, darkTeal), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
+    val s = radius * 0.6f
+    val strokeW = radius * 0.14f
+    // Kaspa 'K' vector
+    val kPath = Path().apply {
+        moveTo(center.x - s * 0.35f, center.y - s * 0.65f)
+        lineTo(center.x - s * 0.35f, center.y + s * 0.65f)
+        moveTo(center.x + s * 0.45f, center.y - s * 0.6f)
+        lineTo(center.x - s * 0.3f, center.y + s * 0.05f)
+        lineTo(center.x + s * 0.45f, center.y + s * 0.65f)
+    }
+    drawPath(path = kPath, color = Color.White, style = Stroke(width = strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+}
+
+// 31. Fetch.ai / ASI (FET) Vector Badge
+private fun DrawScope.drawFetchBadge(center: Offset, radius: Float) {
+    val fetNavy = Color(0xFF1B2A4A)
+    drawCircle(color = fetNavy, radius = radius, center = center)
+    val s = radius * 0.6f
+    // Neural graph network nodes and connections
+    val nodeRadius = radius * 0.12f
+    val nodes = listOf(
+        Offset(center.x - s * 0.5f, center.y - s * 0.35f),
+        Offset(center.x + s * 0.5f, center.y - s * 0.35f),
+        Offset(center.x, center.y + s * 0.45f),
+        Offset(center.x, center.y - s * 0.05f)
+    )
+    nodes.forEach { n1 ->
+        nodes.forEach { n2 ->
+            if (n1 != n2) {
+                drawLine(color = Color.White.copy(alpha = 0.6f), start = n1, end = n2, strokeWidth = radius * 0.07f)
+            }
+        }
+    }
+    nodes.forEach { n ->
+        drawCircle(color = Color(0xFF00E5FF), radius = nodeRadius, center = n)
+    }
 }

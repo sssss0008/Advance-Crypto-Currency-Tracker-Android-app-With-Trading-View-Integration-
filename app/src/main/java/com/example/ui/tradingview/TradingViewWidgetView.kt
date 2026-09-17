@@ -244,7 +244,7 @@ fun TradingViewWidgetView(
                                         } else {
                                             true
                                         }
-                                        Log.e(TAG, "WebView render process exited (didCrash=$didCrash). Cleanly handled.")
+                                        Log.w(TAG, "WebView render process exited (didCrash=$didCrash). Cleanly handled.")
                                         hasError = true
                                         isLoading = false
 
