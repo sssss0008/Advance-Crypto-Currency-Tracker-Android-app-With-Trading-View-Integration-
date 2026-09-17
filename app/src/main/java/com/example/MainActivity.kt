@@ -64,6 +64,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -484,5 +485,137 @@ fun CryptoApp(
             onToggleFavorite = { coin -> viewModel.toggleFavorite(coin) },
             onOpenFullChart = { symbol -> viewModel.openChart(symbol) }
         )
+    }
+}
+
+private data class QuickHubItem(
+    val tab: AppTab,
+    val title: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val badge: String? = null
+)
+
+@Composable
+fun QuickAccessHubBar(
+    currentTab: AppTab,
+    watchlistCount: Int,
+    onTabSelected: (AppTab) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val items = remember(watchlistCount) {
+        listOf(
+            QuickHubItem(AppTab.CHART, "Charts", Icons.Default.CandlestickChart),
+            QuickHubItem(AppTab.MARKETS, "Markets", Icons.Default.CurrencyExchange),
+            QuickHubItem(AppTab.CALCULATORS, "Calculator", Icons.Default.Calculate, "7"),
+            QuickHubItem(AppTab.DICTIONARY, "Dictionary", Icons.AutoMirrored.Filled.MenuBook, "1k+"),
+            QuickHubItem(AppTab.EDUCATION, "Learning", Icons.Default.School, "Academy"),
+            QuickHubItem(AppTab.SCREENER, "Screener", Icons.Default.Tune),
+            QuickHubItem(AppTab.ADVANCED_SCREENER, "Adv Screener", Icons.Default.FilterAlt),
+            QuickHubItem(AppTab.HEATMAP, "Heatmap", Icons.Default.GridView),
+            QuickHubItem(AppTab.WATCHLIST, "Watchlist", Icons.Default.Star, if (watchlistCount > 0) "$watchlistCount" else null),
+            QuickHubItem(AppTab.AI_HUB, "AI Hub", Icons.Default.AutoAwesome, "AI")
+        )
+    }
+
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(items, key = { it.tab.name }) { item ->
+                val isSelected = currentTab == item.tab
+                Surface(
+                    color = if (isSelected) {
+                        when (item.tab) {
+                            AppTab.CALCULATORS -> CryptoAccentGold.copy(alpha = 0.2f)
+                            AppTab.DICTIONARY -> CryptoAccentCyan.copy(alpha = 0.2f)
+                            AppTab.EDUCATION -> CryptoGreen.copy(alpha = 0.2f)
+                            AppTab.WATCHLIST -> CryptoAccentGold.copy(alpha = 0.2f)
+                            else -> MaterialTheme.colorScheme.primaryContainer
+                        }
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    border = if (isSelected) {
+                        BorderStroke(
+                            1.dp,
+                            when (item.tab) {
+                                AppTab.CALCULATORS -> CryptoAccentGold
+                                AppTab.DICTIONARY -> CryptoAccentCyan
+                                AppTab.EDUCATION -> CryptoGreen
+                                AppTab.WATCHLIST -> CryptoAccentGold
+                                else -> MaterialTheme.colorScheme.primary
+                            }
+                        )
+                    } else null,
+                    modifier = Modifier
+                        .clickable { onTabSelected(item.tab) }
+                        .testTag("quick_tab_${item.tab.name.lowercase()}")
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = null,
+                            tint = if (isSelected) {
+                                when (item.tab) {
+                                    AppTab.CALCULATORS -> CryptoAccentGold
+                                    AppTab.DICTIONARY -> CryptoAccentCyan
+                                    AppTab.EDUCATION -> CryptoGreen
+                                    AppTab.WATCHLIST -> CryptoAccentGold
+                                    else -> MaterialTheme.colorScheme.primary
+                                }
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = item.title,
+                            fontSize = 12.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                        if (item.badge != null) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                color = if (isSelected) {
+                                    when (item.tab) {
+                                        AppTab.CALCULATORS -> CryptoAccentGold
+                                        AppTab.DICTIONARY -> CryptoAccentCyan
+                                        AppTab.EDUCATION -> CryptoGreen
+                                        AppTab.WATCHLIST -> CryptoAccentGold
+                                        else -> MaterialTheme.colorScheme.primary
+                                    }
+                                } else {
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                },
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    text = item.badge,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
