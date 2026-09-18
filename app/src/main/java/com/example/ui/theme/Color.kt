@@ -32,3 +32,11 @@ val CryptoLightSurface = Color(0xFFFFFFFF)
 val CryptoLightSurfaceVariant = Color(0xFFF1F5F9)
 val CryptoLightBorder = Color(0xFFE2E8F0)
 
+// Glassmorphism and Neon Accents
+val CryptoGlassDark = Color(0xCC101726)
+val CryptoGlassBorder = Color(0x553B82F6)
+val CryptoGlassHighlight = Color(0x33FFFFFF)
+val CryptoNeonPurple = Color(0xFF8B5CF6)
+val CryptoNeonPink = Color(0xFFEC4899)
+
+

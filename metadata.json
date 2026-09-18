@@ -1,6 +1,6 @@
 {
-  "name": "Crypto Market",
-  "description": "Comprehensive crypto intelligence terminal featuring navigation drawer, watchlist, 1,000+ word crypto dictionary with examples, financial calculators, interactive education hub with quizzes, and Gemini AI market insights.",
+  "name": "Crypto Screener",
+  "description": "Real-time Crypto Screener terminal with interactive TradingView charts, market heatmaps, zero data tracking privacy, offline financial calculators, and 3-page onboarding walkthrough.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

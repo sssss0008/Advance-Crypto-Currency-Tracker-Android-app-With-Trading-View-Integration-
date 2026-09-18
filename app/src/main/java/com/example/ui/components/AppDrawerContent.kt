@@ -30,8 +30,10 @@ import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.ShowChart
@@ -81,7 +83,8 @@ fun AppDrawerContent(
     onTabSelected: (AppTab) -> Unit,
     onCoinSelected: (CryptoCoin) -> Unit,
     onToggleTheme: () -> Unit,
-    onCloseDrawer: () -> Unit
+    onCloseDrawer: () -> Unit,
+    onOpenOnboarding: () -> Unit = {}
 ) {
     val favoriteCoins = remember(coins) { coins.filter { it.isFavorite } }
     val btc = remember(coins) { coins.firstOrNull { it.symbol == "BTC" } }
@@ -107,26 +110,30 @@ fun AppDrawerContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    CryptoCoinVectorBadge(symbol = "BTC", size = 36.dp)
+                    CryptoCoinVectorBadge(symbol = "BTC", size = 38.dp)
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
                         Text(
-                            text = "CryptoPro",
+                            text = "Crypto Screener",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Quant & Terminal",
+                            text = "Real-Time Market Terminal",
                             fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
 
-                IconButton(onClick = onCloseDrawer) {
+                IconButton(
+                    onClick = onCloseDrawer,
+                    modifier = Modifier.testTag("close_drawer_btn")
+                ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close Drawer",
@@ -544,6 +551,76 @@ fun AppDrawerContent(
                     selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 modifier = Modifier.testTag("drawer_item_ai_hub")
+            )
+
+            // About Us
+            NavigationDrawerItem(
+                label = { Text("About Us", fontWeight = FontWeight.SemiBold) },
+                selected = currentTab == AppTab.ABOUT,
+                onClick = {
+                    onTabSelected(AppTab.ABOUT)
+                    onCloseDrawer()
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = CryptoAccentCyan
+                    )
+                },
+                badge = {
+                    Surface(
+                        color = CryptoAccentCyan.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "Info & Team",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CryptoAccentCyan,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier.testTag("drawer_item_about_us")
+            )
+
+            // App Walkthrough / Tour
+            NavigationDrawerItem(
+                label = { Text("App Walkthrough", fontWeight = FontWeight.Medium) },
+                selected = false,
+                onClick = {
+                    onCloseDrawer()
+                    onOpenOnboarding()
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.PlayCircleOutline,
+                        contentDescription = null,
+                        tint = CryptoGreen
+                    )
+                },
+                badge = {
+                    Surface(
+                        color = CryptoGreen.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "3-Page Tour",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CryptoGreen,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.testTag("drawer_item_walkthrough")
             )
 
             Spacer(modifier = Modifier.weight(1f))

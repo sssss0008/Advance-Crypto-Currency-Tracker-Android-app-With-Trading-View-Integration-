@@ -2,70 +2,39 @@ package com.example
 
 import android.app.Application
 import android.content.Context
-import android.system.Os
 import android.util.Log
 import java.io.File
 
 class CryptoApplication : Application() {
 
-    init {
-        applyGraphicsEnvironment()
-    }
-
-    override fun attachBaseContext(base: Context?) {
-        applyGraphicsEnvironment()
-        super.attachBaseContext(base)
+    override fun onCreate() {
+        super.onCreate()
+        cleanCorruptedWebViewCache(this)
     }
 
     companion object {
         private const val TAG = "CryptoApplication"
 
-        init {
-            applyGraphicsEnvironment()
-        }
-
-        fun applyGraphicsEnvironment() {
+        /**
+         * Cleans up any corrupted SimpleCache directory in WebView cache.
+         * Previous versions created subdirectories like "Code Cache/wasm" directly inside
+         * "HTTP Cache", which violated Chromium's SimpleCache disk format and caused
+         * "Could not reconstruct index from disk" and "Failed to write a new fake index" errors.
+         */
+        fun cleanCorruptedWebViewCache(context: Context) {
             try {
-                // Prevent Mesa from attempting to probe non-existent DRM render nodes (/dev/dri/renderD128)
-                // in virtualized Android containers and silence driver logging.
-                Os.setenv("MESA_LOG_FILE", "/dev/null", true)
-                Os.setenv("MESA_DEBUG", "silent", true)
-                Os.setenv("MESA_LOG_LEVEL", "none", true)
-                Os.setenv("LIBGL_ALWAYS_SOFTWARE", "1", true)
-                Os.setenv("GALLIUM_DRIVER", "softpipe", true)
-            } catch (e: Throwable) {
-                Log.w(TAG, "Failed setting graphics environment", e)
-            }
-        }
-
-        fun ensureWebViewCacheDirectories(context: Context) {
-            try {
-                val baseCache = context.cacheDir
-                val dirs = listOf(
-                    File(baseCache, "WebView"),
-                    File(baseCache, "WebView/Default"),
-                    File(baseCache, "WebView/Default/HTTP Cache"),
-                    File(baseCache, "WebView/Default/HTTP Cache/Code Cache"),
-                    File(baseCache, "WebView/Default/HTTP Cache/Code Cache/js"),
-                    File(baseCache, "WebView/Default/HTTP Cache/Code Cache/wasm"),
-                    File(baseCache, "WebView/Default/Code Cache"),
-                    File(baseCache, "WebView/Default/Code Cache/js"),
-                    File(baseCache, "WebView/Default/Code Cache/wasm"),
-                    File(baseCache, "WebView/Default/Cache")
-                )
-                for (dir in dirs) {
-                    if (!dir.exists()) {
-                        dir.mkdirs()
+                val httpCache = File(context.cacheDir, "WebView/Default/HTTP Cache")
+                if (httpCache.exists()) {
+                    val badSubdir = File(httpCache, "Code Cache")
+                    if (badSubdir.exists()) {
+                        Log.i(TAG, "Removing corrupted SimpleCache directory containing invalid subdirectories")
+                        httpCache.deleteRecursively()
                     }
                 }
             } catch (e: Throwable) {
-                Log.w(TAG, "Failed ensuring WebView cache directories", e)
+                Log.w(TAG, "Failed cleaning corrupted WebView cache", e)
             }
         }
     }
-
-    override fun onCreate() {
-        super.onCreate()
-        ensureWebViewCacheDirectories(this)
-    }
 }
+

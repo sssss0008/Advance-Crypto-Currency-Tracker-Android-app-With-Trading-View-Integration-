@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MenuBook
@@ -77,9 +78,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.AppTab
 import com.example.ui.CryptoViewModel
+import com.example.ui.about.AboutUsScreen
 import com.example.ui.components.AppDrawerContent
 import com.example.ui.components.CryptoDetailModal
+import com.example.ui.components.GlassmorphicIconButton
 import com.example.ui.components.TickerTapeBar
+import com.example.ui.onboarding.OnboardingScreen
+import com.example.ui.splash.SplashScreen
 import com.example.ui.screens.CryptoAdvancedScreenerScreen
 import com.example.ui.screens.CryptoAiHubScreen
 import com.example.ui.screens.CryptoCalculatorsScreen
@@ -104,17 +109,30 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        CryptoApplication.applyGraphicsEnvironment()
         super.onCreate(savedInstanceState)
-        CryptoApplication.ensureWebViewCacheDirectories(this)
+        CryptoApplication.cleanCorruptedWebViewCache(this)
         enableEdgeToEdge()
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
             MyApplicationTheme(darkTheme = uiState.isDarkTheme) {
-                CryptoApp(
-                    viewModel = viewModel
-                )
+                when {
+                    uiState.showSplash -> {
+                        SplashScreen(
+                            onSplashFinished = { viewModel.finishSplash() }
+                        )
+                    }
+                    uiState.showOnboarding -> {
+                        OnboardingScreen(
+                            onFinishOnboarding = { viewModel.finishOnboarding() }
+                        )
+                    }
+                    else -> {
+                        CryptoApp(
+                            viewModel = viewModel
+                        )
+                    }
+                }
             }
         }
     }
@@ -136,7 +154,8 @@ fun CryptoApp(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = !uiState.isChartFullscreen,
+        // Disable swipe/drag gesture so drawer opens EXCLUSIVELY by tapping the navigation menu icon button
+        gesturesEnabled = false,
         drawerContent = {
             AppDrawerContent(
                 currentTab = uiState.currentTab,
@@ -153,6 +172,9 @@ fun CryptoApp(
                 },
                 onCloseDrawer = {
                     scope.launch { drawerState.close() }
+                },
+                onOpenOnboarding = {
+                    viewModel.reopenOnboarding()
                 }
             )
         }
@@ -165,19 +187,24 @@ fun CryptoApp(
                 if (!hideBars) {
                     TopAppBar(
                         navigationIcon = {
-                            IconButton(
-                                onClick = {
-                                    scope.launch {
-                                        if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                    }
-                                },
-                                modifier = Modifier.testTag("open_drawer_btn")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Open Navigation Drawer",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
+                            Box(modifier = Modifier.padding(start = 8.dp, end = 4.dp)) {
+                                GlassmorphicIconButton(
+                                    onClick = {
+                                        scope.launch {
+                                            if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                        }
+                                    },
+                                    size = 40.dp,
+                                    tintGlow = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.testTag("open_drawer_btn")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Open Navigation Drawer",
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
                             }
                         },
                         title = {
@@ -192,6 +219,7 @@ fun CryptoApp(
                                 AppTab.CALCULATORS -> "Crypto Calculators"
                                 AppTab.EDUCATION -> "Learning Portal"
                                 AppTab.AI_HUB -> "AI Hub"
+                                AppTab.ABOUT -> "About Us"
                             }
 
                             val headerSubtitle = when (uiState.currentTab) {
@@ -205,6 +233,7 @@ fun CryptoApp(
                                 AppTab.CALCULATORS -> "7 Precision Tools & Interactive Keypad"
                                 AppTab.EDUCATION -> "Academy Modules & Practice Quizzes"
                                 AppTab.AI_HUB -> "Gemini AI Trading Assistant"
+                                AppTab.ABOUT -> "Awiskar Acharya • Privacy • Free Project"
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -219,6 +248,7 @@ fun CryptoApp(
                                                 AppTab.CALCULATORS -> CryptoAccentGold
                                                 AppTab.DICTIONARY -> CryptoAccentCyan
                                                 AppTab.EDUCATION -> CryptoGreen
+                                                AppTab.ABOUT -> CryptoAccentCyan
                                                 else -> MaterialTheme.colorScheme.primary
                                             }
                                         ),
@@ -226,16 +256,17 @@ fun CryptoApp(
                                 ) {
                                     Icon(
                                         imageVector = when (uiState.currentTab) {
-                                            AppTab.CHART -> Icons.Default.CandlestickChart
-                                            AppTab.SCREENER -> Icons.Default.Tune
-                                            AppTab.ADVANCED_SCREENER -> Icons.Default.FilterAlt
-                                            AppTab.HEATMAP -> Icons.Default.GridView
-                                            AppTab.MARKETS -> Icons.Default.CurrencyExchange
-                                            AppTab.WATCHLIST -> Icons.Default.Star
-                                            AppTab.CALCULATORS -> Icons.Default.Calculate
-                                            AppTab.DICTIONARY -> Icons.AutoMirrored.Filled.MenuBook
-                                            AppTab.EDUCATION -> Icons.Default.School
-                                            AppTab.AI_HUB -> Icons.Default.AutoAwesome
+                                             AppTab.CHART -> Icons.Default.CandlestickChart
+                                             AppTab.SCREENER -> Icons.Default.Tune
+                                             AppTab.ADVANCED_SCREENER -> Icons.Default.FilterAlt
+                                             AppTab.HEATMAP -> Icons.Default.GridView
+                                             AppTab.MARKETS -> Icons.Default.CurrencyExchange
+                                             AppTab.WATCHLIST -> Icons.Default.Star
+                                             AppTab.CALCULATORS -> Icons.Default.Calculate
+                                             AppTab.DICTIONARY -> Icons.AutoMirrored.Filled.MenuBook
+                                             AppTab.EDUCATION -> Icons.Default.School
+                                             AppTab.AI_HUB -> Icons.Default.AutoAwesome
+                                             AppTab.ABOUT -> Icons.Default.Info
                                         },
                                         contentDescription = null,
                                         tint = Color.White,
@@ -261,15 +292,20 @@ fun CryptoApp(
                             }
                         },
                         actions = {
-                            IconButton(
-                                onClick = { viewModel.toggleTheme() },
-                                modifier = Modifier.testTag("theme_toggle_btn")
-                            ) {
-                                Icon(
-                                    imageVector = if (uiState.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                                    contentDescription = "Toggle Theme",
-                                    tint = if (uiState.isDarkTheme) CryptoAccentGold else MaterialTheme.colorScheme.primary
-                                )
+                            Box(modifier = Modifier.padding(end = 8.dp)) {
+                                GlassmorphicIconButton(
+                                    onClick = { viewModel.toggleTheme() },
+                                    size = 40.dp,
+                                    tintGlow = if (uiState.isDarkTheme) CryptoAccentGold else MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.testTag("theme_toggle_btn")
+                                ) {
+                                    Icon(
+                                        imageVector = if (uiState.isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                        contentDescription = "Toggle Theme",
+                                        tint = if (uiState.isDarkTheme) CryptoAccentGold else MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
@@ -471,6 +507,11 @@ fun CryptoApp(
                                 onSelectSymbol = { symbol -> viewModel.openChart(symbol) }
                             )
                         }
+                        AppTab.ABOUT -> {
+                            AboutUsScreen(
+                                onReplayOnboarding = { viewModel.reopenOnboarding() }
+                            )
+                        }
                     }
                 }
             }
@@ -514,7 +555,8 @@ fun QuickAccessHubBar(
             QuickHubItem(AppTab.ADVANCED_SCREENER, "Adv Screener", Icons.Default.FilterAlt),
             QuickHubItem(AppTab.HEATMAP, "Heatmap", Icons.Default.GridView),
             QuickHubItem(AppTab.WATCHLIST, "Watchlist", Icons.Default.Star, if (watchlistCount > 0) "$watchlistCount" else null),
-            QuickHubItem(AppTab.AI_HUB, "AI Hub", Icons.Default.AutoAwesome, "AI")
+            QuickHubItem(AppTab.AI_HUB, "AI Hub", Icons.Default.AutoAwesome, "AI"),
+            QuickHubItem(AppTab.ABOUT, "About Us", Icons.Default.Info, "Free")
         )
     }
 

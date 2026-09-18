@@ -97,7 +97,6 @@ fun TradingViewWidgetView(
                         .testTag("tradingview_webview"),
                     factory = { context ->
                         try {
-                            com.example.CryptoApplication.ensureWebViewCacheDirectories(context)
                             WebView(context).apply {
                                 layoutParams = ViewGroup.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT,

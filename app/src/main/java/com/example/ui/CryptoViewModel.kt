@@ -1,6 +1,7 @@
 package com.example.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -29,7 +30,8 @@ enum class AppTab(val title: String) {
     DICTIONARY("Dictionary"),
     CALCULATORS("Calculators"),
     EDUCATION("Education"),
-    AI_HUB("AI Hub")
+    AI_HUB("AI Hub"),
+    ABOUT("About Us")
 }
 
 data class CryptoUiState(
@@ -38,6 +40,8 @@ data class CryptoUiState(
     val currentTab: AppTab = AppTab.CHART,
     val selectedCoin: CryptoCoin? = null,
     val isDarkTheme: Boolean = true,
+    val showSplash: Boolean = true,
+    val showOnboarding: Boolean = false,
     // Toggles between Native and TradingView Embed - default to TradingView widgets
     val isTvOverviewMode: Boolean = true,
     val isTvHeatmapMode: Boolean = true,
@@ -58,8 +62,13 @@ data class CryptoUiState(
 class CryptoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: CryptoRepository
+    private val prefs = application.getSharedPreferences("crypto_screener_prefs", Context.MODE_PRIVATE)
 
-    private val _uiState = MutableStateFlow(CryptoUiState())
+    private val _uiState = MutableStateFlow(
+        CryptoUiState(
+            showOnboarding = !prefs.getBoolean("onboarding_completed", false)
+        )
+    )
     val uiState: StateFlow<CryptoUiState> = _uiState.asStateFlow()
 
     init {
@@ -197,6 +206,19 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
                 selectedCoin = null
             )
         }
+    }
+
+    fun finishSplash() {
+        _uiState.update { it.copy(showSplash = false) }
+    }
+
+    fun finishOnboarding() {
+        prefs.edit().putBoolean("onboarding_completed", true).apply()
+        _uiState.update { it.copy(showOnboarding = false) }
+    }
+
+    fun reopenOnboarding() {
+        _uiState.update { it.copy(showOnboarding = true) }
     }
 
     class Factory(private val application: Application) : ViewModelProvider.Factory {
