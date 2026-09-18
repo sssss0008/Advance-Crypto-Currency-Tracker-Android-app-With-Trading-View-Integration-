@@ -47,6 +47,20 @@ fun CryptoCoinVectorBadge(
             val center = Offset(this.size.width / 2f, this.size.height / 2f)
             val radius = canvasSize / 2f
 
+            // Outer soft ambient glow ring
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.12f),
+                        Color.Transparent
+                    ),
+                    center = center,
+                    radius = radius
+                ),
+                radius = radius,
+                center = center
+            )
+
             when (cleanSymbol) {
                 "BTC" -> drawBitcoinBadge(center, radius)
                 "ETH" -> drawEthereumBadge(center, radius)
@@ -80,6 +94,22 @@ fun CryptoCoinVectorBadge(
                 "FET" -> drawFetchBadge(center, radius)
                 else -> drawGenericCryptoBadge(cleanSymbol, center, radius)
             }
+
+            // Glass specular rim reflection
+            drawCircle(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.25f),
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.20f)
+                    ),
+                    start = Offset(center.x - radius, center.y - radius),
+                    end = Offset(center.x + radius, center.y + radius)
+                ),
+                radius = radius - 0.75f,
+                center = center,
+                style = Stroke(width = 1.2f)
+            )
         }
 
         // For generic coins that fall into fallback, display monogram text on top

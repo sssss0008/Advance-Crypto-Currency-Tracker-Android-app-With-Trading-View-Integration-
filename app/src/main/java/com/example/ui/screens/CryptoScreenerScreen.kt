@@ -63,6 +63,7 @@ import com.example.data.model.ScreenerColumn
 import com.example.data.model.SortOption
 import com.example.data.model.TechnicalRating
 import com.example.ui.components.CryptoCoinVectorBadge
+import com.example.ui.components.GlassmorphicCard
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoGreen
 import com.example.ui.theme.CryptoGreenBg
@@ -435,17 +436,22 @@ fun ScreenerCoinRow(
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
+    val isPositive = coin.change24h >= 0
+    GlassmorphicCard(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        surfaceAlpha = 0.50f,
+        borderAlpha = 0.15f,
+        accentGlow = if (isPositive) CryptoGreen else CryptoRed,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 2.dp)
             .testTag("screener_row_${coin.symbol}")
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Symbol & Rank

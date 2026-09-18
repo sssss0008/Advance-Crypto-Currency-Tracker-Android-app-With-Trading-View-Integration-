@@ -49,8 +49,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import com.example.data.model.CryptoCategory
 import com.example.data.model.CryptoCoin
+import com.example.ui.components.GlassmorphicCard
 import com.example.ui.theme.CryptoGreen
 import com.example.ui.theme.CryptoRed
 import com.example.ui.tradingview.TradingViewHtml
@@ -367,14 +376,46 @@ fun HeatmapTile(
     isLarge: Boolean = false
 ) {
     val bgColor = getHeatmapColor(coin.change24h)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.95f
+            isHovered -> 1.04f
+            else -> 1f
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "tileScale"
+    )
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(6.dp))
-            .background(bgColor)
-            .border(0.8.dp, Color.Black.copy(alpha = 0.25f), RoundedCornerShape(6.dp))
-            .clickable { onCoinClick(coin) }
+            .scale(scale)
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        bgColor,
+                        bgColor.copy(alpha = if (isHovered) 0.95f else 0.85f)
+                    )
+                )
+            )
+            .border(
+                width = if (isHovered) 1.5.dp else 0.8.dp,
+                color = if (isHovered) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = { onCoinClick(coin) }
+            )
             .padding(6.dp)
             .testTag("heatmap_tile_${coin.symbol}"),
         contentAlignment = Alignment.Center
@@ -438,20 +479,21 @@ fun HeatmapCoinPreviewCard(
     onDismiss: () -> Unit,
     onOpenChart: () -> Unit
 ) {
-    Card(
+    val isPositive = coin.change24h >= 0
+    GlassmorphicCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
             .testTag("heatmap_preview_card"),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        shape = RoundedCornerShape(16.dp),
+        accentGlow = if (isPositive) CryptoGreen else CryptoRed,
+        borderAlpha = 0.35f,
+        surfaceAlpha = 0.85f
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

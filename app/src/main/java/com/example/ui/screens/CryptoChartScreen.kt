@@ -63,6 +63,8 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.CryptoCoin
 import com.example.ui.components.CryptoCoinVectorBadge
 import com.example.ui.components.CryptoInteractiveChart
+import com.example.ui.components.GlassmorphicCard
+import com.example.ui.components.GlassmorphicIconButton
 import com.example.ui.theme.CryptoGreen
 import com.example.ui.theme.CryptoRed
 import com.example.ui.tradingview.TradingViewHtml
@@ -136,12 +138,14 @@ fun CryptoChartScreen(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Surface(
+            GlassmorphicCard(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
                     .testTag("chart_top_header_bar"),
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 2.dp
+                shape = RoundedCornerShape(12.dp),
+                surfaceAlpha = 0.80f,
+                borderAlpha = 0.20f
             ) {
                 Row(
                     modifier = Modifier
@@ -161,8 +165,8 @@ fun CryptoChartScreen(
                             .padding(horizontal = 4.dp, vertical = 2.dp)
                             .testTag("chart_coin_picker_btn")
                     ) {
-                        CryptoCoinVectorBadge(symbol = displaySymbol, size = 22.dp)
-                        Spacer(modifier = Modifier.width(6.dp))
+                        CryptoCoinVectorBadge(symbol = displaySymbol, size = 26.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
@@ -209,80 +213,79 @@ fun CryptoChartScreen(
                         }
                     }
 
-                    // Right: Control actions
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Right: Control actions with Glassmorphic micro-buttons
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         // Quick Search Dialog button
-                        IconButton(
+                        GlassmorphicIconButton(
                             onClick = { showSearchDialog = true },
-                            modifier = Modifier
-                                .size(34.dp)
-                                .testTag("chart_search_dialog_btn")
+                            size = 34.dp,
+                            modifier = Modifier.testTag("chart_search_dialog_btn")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search and Change Coin",
                                 tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(19.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
                         // Toggle between TradingView and Native Chart
-                        IconButton(
+                        GlassmorphicIconButton(
                             onClick = { isTvMode = !isTvMode },
-                            modifier = Modifier
-                                .size(34.dp)
-                                .testTag("chart_mode_toggle_btn")
+                            size = 34.dp,
+                            tintGlow = if (isTvMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.testTag("chart_mode_toggle_btn")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.SwapHoriz,
                                 contentDescription = if (isTvMode) "Switch to Native Chart" else "Switch to TradingView Chart",
                                 tint = if (isTvMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
                         if (isTvMode) {
-                            IconButton(
+                            GlassmorphicIconButton(
                                 onClick = { refreshKey++ },
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .testTag("chart_refresh_btn")
+                                size = 34.dp,
+                                modifier = Modifier.testTag("chart_refresh_btn")
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Refresh,
                                     contentDescription = "Refresh Chart",
                                     tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(19.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                         }
 
-                        IconButton(
+                        GlassmorphicIconButton(
                             onClick = onToggleFullscreen,
-                            modifier = Modifier
-                                .size(34.dp)
-                                .testTag("chart_fullscreen_btn")
+                            size = 34.dp,
+                            modifier = Modifier.testTag("chart_fullscreen_btn")
                         ) {
                             Icon(
                                 imageVector = if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
                                 contentDescription = if (isFullscreen) "Exit Fullscreen" else "Fullscreen Mode",
                                 tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
                         // Hide/Collapse Header Button (gives maximum space if user desires)
-                        IconButton(
+                        GlassmorphicIconButton(
                             onClick = { isHeaderVisible = false },
-                            modifier = Modifier
-                                .size(34.dp)
-                                .testTag("chart_hide_header_btn")
+                            size = 34.dp,
+                            modifier = Modifier.testTag("chart_hide_header_btn")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowUp,
                                 contentDescription = "Hide Header Bar",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -592,15 +595,17 @@ private fun NativeChartFullView(
 
         // Stats Footer
         if (coin != null) {
-            Card(
+            GlassmorphicCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                shape = RoundedCornerShape(14.dp),
+                accentGlow = if (isPositive) CryptoGreen else CryptoRed,
+                borderAlpha = 0.25f,
+                surfaceAlpha = 0.75f
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp),
+                        .padding(14.dp),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {

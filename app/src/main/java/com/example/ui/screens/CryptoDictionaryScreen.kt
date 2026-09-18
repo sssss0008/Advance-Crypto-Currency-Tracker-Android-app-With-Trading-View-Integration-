@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.CryptoDictionaryData
 import com.example.data.model.CryptoDictionaryCategories
 import com.example.data.model.DictionaryEntry
+import com.example.ui.components.GlassmorphicCard
 import com.example.ui.theme.CryptoAccentCyan
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoPrimary

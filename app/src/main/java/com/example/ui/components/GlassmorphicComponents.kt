@@ -175,3 +175,89 @@ fun GlassmorphicIconButton(
         content = content
     )
 }
+
+/**
+ * Premium Glassmorphic Coin Card featuring soft gradient reflection, glowing borders based on
+ * 24h market performance (neon green or neon red), and interactive hover & press micro-animations.
+ */
+@Composable
+fun GlassmorphicCoinCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isPositive: Boolean = true,
+    isFlashing: Boolean = false,
+    flashColor: Color = Color.Transparent,
+    shape: Shape = RoundedCornerShape(16.dp),
+    content: @Composable BoxScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.98f
+            isHovered -> 1.015f
+            else -> 1f
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "coinCardScale"
+    )
+
+    val baseBorderColor = if (isPositive) Color(0xFF00E676) else Color(0xFFFF5252)
+    val borderAlpha by animateFloatAsState(
+        targetValue = when {
+            isHovered -> 0.65f
+            isPressed -> 0.50f
+            else -> 0.20f
+        },
+        animationSpec = tween(220),
+        label = "borderGlow"
+    )
+
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+
+    val cardBrush = Brush.linearGradient(
+        colors = if (isFlashing) {
+            listOf(
+                flashColor.copy(alpha = 0.35f),
+                surfaceVariant.copy(alpha = 0.85f)
+            )
+        } else {
+            listOf(
+                surfaceVariant.copy(alpha = if (isHovered) 0.90f else 0.70f),
+                surfaceColor.copy(alpha = if (isHovered) 0.80f else 0.60f)
+            )
+        }
+    )
+
+    val borderBrush = Brush.linearGradient(
+        colors = listOf(
+            baseBorderColor.copy(alpha = borderAlpha),
+            Color.White.copy(alpha = if (isHovered) 0.40f else 0.12f),
+            baseBorderColor.copy(alpha = borderAlpha * 0.4f)
+        )
+    )
+
+    Box(
+        modifier = modifier
+            .scale(scale)
+            .clip(shape)
+            .background(brush = cardBrush, shape = shape)
+            .border(
+                width = if (isHovered) 1.5.dp else 1.dp,
+                brush = borderBrush,
+                shape = shape
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        content = content
+    )
+}

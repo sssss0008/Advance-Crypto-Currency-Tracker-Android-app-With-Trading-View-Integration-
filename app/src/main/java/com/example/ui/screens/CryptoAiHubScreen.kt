@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.ai.GeminiCryptoService
 import com.example.data.model.CryptoCoin
 import com.example.ui.components.CryptoCoinVectorBadge
+import com.example.ui.components.GlassmorphicCard
 import com.example.ui.theme.CryptoAccentCyan
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoGreen
@@ -193,10 +194,12 @@ fun CryptoAiHubScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             items(defaultQuickPrompts) { item ->
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.clickable {
+                GlassmorphicCard(
+                    shape = RoundedCornerShape(12.dp),
+                    surfaceAlpha = 0.60f,
+                    borderAlpha = 0.20f,
+                    accentGlow = MaterialTheme.colorScheme.primary,
+                    onClick = {
                         queryText = item.prompt
                         isLoading = true
                         scope.launch {
@@ -206,7 +209,7 @@ fun CryptoAiHubScreen(
                     }
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -293,12 +296,11 @@ fun CryptoAiHubScreen(
                     }
                 }
             } else if (aiOutput != null) {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                GlassmorphicCard(
+                    shape = RoundedCornerShape(18.dp),
+                    surfaceAlpha = 0.85f,
+                    borderAlpha = 0.35f,
+                    accentGlow = CryptoAccentCyan,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("ai_response_card")
@@ -386,11 +388,11 @@ fun CryptoAiHubScreen(
                 }
             } else {
                 // Empty state with coin quick analysis buttons
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                    ),
+                GlassmorphicCard(
+                    shape = RoundedCornerShape(20.dp),
+                    surfaceAlpha = 0.55f,
+                    borderAlpha = 0.20f,
+                    accentGlow = CryptoPrimary,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -435,40 +437,46 @@ fun CryptoAiHubScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            coins.take(3).forEach { coin ->
-                                Button(
-                                    onClick = {
-                                        queryText = "Analyze ${coin.name} (${coin.symbol})"
-                                        isLoading = true
-                                        scope.launch {
-                                            aiOutput = GeminiCryptoService.analyzeCoin(coin)
-                                            isLoading = false
+                                coins.take(3).forEach { coin ->
+                                    val isPositive = coin.change24h >= 0
+                                    GlassmorphicCard(
+                                        shape = RoundedCornerShape(12.dp),
+                                        surfaceAlpha = 0.70f,
+                                        borderAlpha = 0.20f,
+                                        accentGlow = if (isPositive) CryptoGreen else CryptoRed,
+                                        onClick = {
+                                            queryText = "Analyze ${coin.name} (${coin.symbol})"
+                                            isLoading = true
+                                            scope.launch {
+                                                aiOutput = GeminiCryptoService.analyzeCoin(coin)
+                                                isLoading = false
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 8.dp, vertical = 10.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            CryptoCoinVectorBadge(symbol = coin.symbol, size = 26.dp)
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = coin.symbol,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "$${String.format("%.2f", coin.priceUsd)}",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = if (isPositive) CryptoGreen else CryptoRed
+                                            )
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.surface
-                                    ),
-                                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        CryptoCoinVectorBadge(symbol = coin.symbol, size = 22.dp)
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = coin.symbol,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.sp,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = "$${String.format("%.2f", coin.priceUsd)}",
-                                            fontSize = 11.sp,
-                                            color = if (coin.change24h >= 0) CryptoGreen else CryptoRed
-                                        )
                                     }
                                 }
-                            }
                         }
                     }
                 }

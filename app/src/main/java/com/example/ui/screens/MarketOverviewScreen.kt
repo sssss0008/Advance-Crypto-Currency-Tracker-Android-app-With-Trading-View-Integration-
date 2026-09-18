@@ -57,6 +57,8 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.CryptoCoin
 import com.example.data.model.MarketOverviewMetrics
 import com.example.ui.components.CryptoCoinVectorBadge
+import com.example.ui.components.GlassmorphicCard
+import com.example.ui.components.GlassmorphicCoinCard
 import com.example.ui.components.SparklineChart
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoGreen
@@ -212,12 +214,12 @@ fun MarketMetricsBanner(
     metrics: MarketOverviewMetrics,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    GlassmorphicCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        accentGlow = CryptoGreen,
+        borderAlpha = 0.25f,
+        surfaceAlpha = 0.70f
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -235,9 +237,9 @@ fun MarketMetricsBanner(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(CryptoGreenBg)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = "Fear & Greed: ${metrics.fearGreedIndex} (${metrics.fearGreedLabel})",
@@ -329,33 +331,27 @@ fun CryptoCoinCard(
     modifier: Modifier = Modifier
 ) {
     val isPositive = coin.change24h >= 0
-    val targetBg = when {
-        coin.isFlashUp -> CryptoGreen.copy(alpha = 0.25f)
-        coin.isFlashDown -> CryptoRed.copy(alpha = 0.25f)
-        else -> MaterialTheme.colorScheme.surface
+    val isFlashing = coin.isFlashUp || coin.isFlashDown
+    val flashColor = when {
+        coin.isFlashUp -> CryptoGreen
+        coin.isFlashDown -> CryptoRed
+        else -> Color.Transparent
     }
-    val animatedBg by animateColorAsState(
-        targetValue = targetBg,
-        animationSpec = tween(durationMillis = 350),
-        label = "flashBg"
-    )
 
-    Card(
+    GlassmorphicCoinCard(
+        onClick = onClick,
+        isPositive = isPositive,
+        isFlashing = isFlashing,
+        flashColor = flashColor,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp)
-            .testTag("coin_card_${coin.symbol}"),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = animatedBg
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .testTag("coin_card_${coin.symbol}")
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Rank
@@ -417,7 +413,7 @@ fun CryptoCoinCard(
                 )
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(RoundedCornerShape(6.dp))
                         .background(if (isPositive) CryptoGreenBg else CryptoRedBg)
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {

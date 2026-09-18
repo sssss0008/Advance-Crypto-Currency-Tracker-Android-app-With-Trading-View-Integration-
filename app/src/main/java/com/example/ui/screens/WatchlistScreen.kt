@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.CryptoCoin
 import com.example.ui.components.CryptoCoinVectorBadge
+import com.example.ui.components.GlassmorphicCoinCard
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoGreen
 import com.example.ui.theme.CryptoRed
@@ -325,16 +326,14 @@ private fun WatchlistCoinCard(
     onChartClick: () -> Unit,
     onToggleFavorite: () -> Unit
 ) {
-    Card(
+    val isPositive = coin.change24h >= 0
+
+    GlassmorphicCoinCard(
+        onClick = onClick,
+        isPositive = isPositive,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .testTag("watchlist_card_${coin.symbol}"),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .testTag("watchlist_card_${coin.symbol}")
     ) {
         Row(
             modifier = Modifier
