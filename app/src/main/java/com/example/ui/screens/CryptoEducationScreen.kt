@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.CryptoEducationData
 import com.example.data.LessonModule
 import com.example.data.QuizQuestion
+import com.example.ui.components.GlassmorphicCard
 import com.example.ui.theme.CryptoAccentCyan
 import com.example.ui.theme.CryptoAccentGold
 import com.example.ui.theme.CryptoGreen
@@ -199,16 +200,15 @@ private fun LessonsListView(
         modifier = Modifier.fillMaxSize()
     ) {
         items(modules, key = { it.id }) { module ->
-            Card(
+            GlassmorphicCard(
+                onClick = { onSelectLesson(module) },
+                shape = RoundedCornerShape(16.dp),
+                surfaceAlpha = 0.70f,
+                borderAlpha = 0.20f,
+                accentGlow = CryptoAccentCyan,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onSelectLesson(module) }
-                    .testTag("lesson_card_${module.id}"),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    .testTag("lesson_card_${module.id}")
             ) {
                 Column(
                     modifier = Modifier
@@ -563,13 +563,12 @@ private fun PracticeQuizView() {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Question Card
-            Card(
+            GlassmorphicCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                shape = RoundedCornerShape(18.dp),
+                surfaceAlpha = 0.75f,
+                borderAlpha = 0.25f,
+                accentGlow = CryptoAccentCyan
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Surface(

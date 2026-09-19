@@ -314,16 +314,15 @@ private fun DictionaryCard(
     onToggleExpand: () -> Unit,
     onAskAi: () -> Unit
 ) {
-    Card(
+    GlassmorphicCard(
+        onClick = onToggleExpand,
+        shape = RoundedCornerShape(16.dp),
+        surfaceAlpha = 0.70f,
+        borderAlpha = 0.20f,
+        accentGlow = CryptoAccentCyan,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onToggleExpand)
-            .testTag("dictionary_card_${entry.id}"),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .testTag("dictionary_card_${entry.id}")
     ) {
         Column(
             modifier = Modifier
